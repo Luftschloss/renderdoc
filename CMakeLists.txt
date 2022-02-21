@@ -7,6 +7,8 @@ if(APPLE)
 endif()
 
 # Configure some stuff that needs to be set really early
+# 检查编译环境：JAVA_HOME、ANDROID_SDK、ANDROID_NDK
+# 设置NDK编译环境变量
 if(BUILD_ANDROID)
     if(NOT DEFINED ENV{JAVA_HOME})
         message(FATAL_ERROR "JAVA_HOME environment variable must be defined for Android build")
@@ -77,7 +79,7 @@ if(BUILD_ANDROID)
     set(ANDROID_ABI "armeabi-v7a" CACHE STRING "The Android ABI to build for")
 endif()
 
-# disallow in-source builds because we have a top-level wrapper Makefile
+# disallow in-source builds because we have a top-level wrapper Makefile (只允许in-source build, 工程结构清爽一些)
 if(CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR)
     message(FATAL_ERROR "In-source builds not allowed")
 endif()

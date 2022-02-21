@@ -14,6 +14,10 @@ mingw-w64-x86_64-gcc 10.2.0-1
 mingw-w64-x86_64-make 4.3-1
 ```
 
+MinGW安装教程：
+
+https://people.eng.unimelb.edu.au/ammoffat/teaching/20005/Install-MinGW.pdf
+
 环境部署相关命令：
 
 ```
@@ -24,10 +28,11 @@ pacman -S <packagename>		安装对应的包
 编译APK步骤：
 
 ```shell
-cd到对应apk编译目录（空文件夹）
-cmake -DBUILD_ANDROID=On -DANDROID_ABI=armeabi-v7a		构建生成文件32位
-cmake -DBUILD_ANDROID=On -DANDROID_ABI=arm64-v8a		构建生成文件64位
-mingw32-make -j8										生成APK
+mkdir build-android(64)
+cd build-android
+cmake -DBUILD_ANDROID=On -DANDROID_ABI=armeabi-v7a -G "MinGW Makefiles" ..		构建生成文件32位
+cmake -DBUILD_ANDROID=On -DANDROID_ABI=arm64-v8a -G "MinGW Makefiles" ..		构建生成文件64位
+mingw32-make -j8											生成APK
 ```
 
 
@@ -46,11 +51,21 @@ ADB常用命令行：
 #查看Android手机SDK版本
 adb shell getprop ro.build.version.sdk
 
+#查看Android手机所有配置设置
+adb shell getprop
+
 #关闭正在运行的Activity
 adb shell am force-stop <package_name>
 
-移除存在Socket端口监听--
+#移除存在Socket端口监听--
 adb forward --remove tcp:xxx
+#查看所有的转发连接
+adb forward --list
+#创建一个转发：将PC端11111端口收到的数据转发给手机上的22222端口
+adb forward tcp:11111 tcp:22222
+#要建立连接还需要
+（a）在手机端，建立一个端口为22222的server，并打开server到监听状态。
+（b）在PC端，建立一个socket client端，连接到端口为11111的server上。
 ```
 
 jdwp Hook流程
@@ -71,7 +86,7 @@ adb shell settings put global gpu_debug_layers VK_LAYER_RENDERDOC_Capture
 #查看全局设置
 adb shell settings list global
 #启动待抓帧的目标应用
-adb shell am start -S -n <package_name>/com.unity3d.player.UnityPlayerActivity
+adb shell am start -S -n <package_name>/<activity_name>
 ```
 
 
@@ -90,7 +105,7 @@ DisconnectFromRemoteServer：断开远端设备连接
 
 CurrentRemote：获取当前连接设备（RemoteHost）
 
-ExecuteAndInject：启动Activity并注入
+**ExecuteAndInject**：启动Activity并注入（点击Launch后很重要的一步）
 
 
 
@@ -124,6 +139,8 @@ m_CaptureCallback：Launch时，非Inject模式触发，对应MainWindow的OnCap
 
 m_InjectCallback：Launch时，Inject模式触发，对应MinWindow的OnInjectTrigger
 
+CheckAndroidSetup：检查Android打包设置（RENDERDOC_CheckAndroidPackage）
+
 #### 其他核心脚本
 
 ##### core.cpp
@@ -135,6 +152,10 @@ m_Protocols （map）：存放设备Protocol的字典
 RegisterDeviceProtocol：注册设备Protocol
 
 GetDeviceProtocol：获取设备Protocol
+
+----so----
+
+RegisterMemoryRegion
 
 
 
@@ -154,7 +175,15 @@ LazilyStartLogcatThread：判断LogcatProcess是否运行
 
 GetJdwpPort：生成jdwp端口号，35900依次+1
 
-SupportsNativeLayers
+OpenCapture：打开RDC文件
+
+
+
+SupportsNativeLayers：Version Check
+
+ResetCaptureSettings：重置抓屏设置
+
+
 
 
 
@@ -173,6 +202,58 @@ GetFolderName：获取Android设备目录
 Connected：检查与远端服务器的Socket连接是否在
 
 Ping：Ping设备Server
+
+
+
+##### target_control.cpp
+
+TriggerCapture：点击Capture后，创建RDC序列化写入流
+
+ReceiveMessage：记录Capture信息
+
+RENDERDOC_CreateTargetControl：创建Socket链接，Launch的时候触发
+
+
+
+##### LiveCapture.cpp
+
+connectionThreadEntry：客户端Socket线程监听入口
+
+
+
+##### jdwp.cpp
+
+InjectWithJDWP：注入
+
+
+
+##### serialiser.cpp
+
+序列化读写通用工具类
+
+
+
+##### gl_driver.cpp
+
+Android端OpenGL平台截帧及Replay核心类WrappedOpenGL
+
+BuildGLExtensions：初始化构建GL扩展接口
+
+BuildGLESExtensions：初始化构建GLES扩展接口
+
+
+
+##### gl_driver.h
+
+定义了一些OpenGL对象ShaderData、ProgramData、PipelineData、TextureData
+
+定义了一系列Hook的序列化函数接口，具体实现在gl/Function Wrappers中，具体调用在WrappedOpenGL::ProcessChunk
+
+
+
+##### gl_replay.cpp
+
+CreateReplayDevice：创建
 
 
 
