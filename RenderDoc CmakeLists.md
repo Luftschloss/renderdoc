@@ -87,9 +87,14 @@ EXISTS "Path"
 # 获得STR变量的字符串值
 &{<variable>}
 
+# 字符串相等符
 STREQUAL
 
-# Set a CMake, cache or environment variable to a given value，CMake脚本创建或设置变量的函数，同命令行的-D
+# 项目名
+project(<PROJECT-NAME> [<language-name>...])
+
+# 设置变量值，同命令行的-D<variable>=<value>, 使用CACHE可以将该变量缓存至CMakeCache.txt，使用Force是Overwrite缓存值，并不是使用缓存值，使用
+# PARENT_SCOPE调高变量作用域到父目录或调用该函数处（PARENT_SCOPE和CACHE互斥）
 set(<variable> <value>
       [[CACHE <type> <docstring> [FORCE]] | PARENT_SCOPE])
 
@@ -115,6 +120,22 @@ execute_process(COMMAND <cmd1> [args1...]]
                   [OUTPUT_STRIP_TRAILING_WHITESPACE]
                   [ERROR_STRIP_TRAILING_WHITESPACE])
 
+# 
+add_custom_command(OUTPUT output1 [output2 ...]
+                   COMMAND command1 [ARGS] [args1...]
+                   [COMMAND command2 [ARGS] [args2...] ...]
+                   [MAIN_DEPENDENCY depend]
+                   [DEPENDS [depends...]]
+                   [BYPRODUCTS [files...]]
+                   [IMPLICIT_DEPENDS <lang1> depend1
+                                    [<lang2> depend2] ...]
+                   [WORKING_DIRECTORY dir]
+                   [COMMENT comment]
+                   [DEPFILE depfile]
+                   [JOB_POOL job_pool]
+                   [VERBATIM] [APPEND] [USES_TERMINAL]
+                   [COMMAND_EXPAND_LISTS])
+
 # list变量
 list(LENGTH <list><output variable>)										#返回list的长度							
 list(GET <list> <elementindex> [<element index> ...]<output variable>) 		#返回list中index的element到value中
@@ -138,6 +159,133 @@ endfunction([<fname>])
 # 字符串匹配
 MATCHES
 
+# 查找指定目录下的所有源文件，然后将结果存进指定变量
+aux_source_directory(<dir> <variable>)
+
+# 将指定目录添加到编译器的头文件搜索路径之下，指定的目录被解释成当前源码路径的相对路径，默认添加到最后（AFTER），该函数只作用于当前CMakeLists
+include_directories([AFTER|BEFORE] [SYSTEM] dir1 [dir2 ...])
+
+# 添加一个子目录并构建该子目录，子目录下应该包含CMakeLists.txt文件和代码文件。子目录可以是相对路径也可以是绝对路径，如果是相对路径，则是相对当前目录的一个相对路径，binary_dir指定输出目录，不指定默认为source_dir，EXCLUDE_FROM_ALL指定后子目录下的目标不会被父目录下的目标文件包含进去，父目录的CMakeLists.txt不会构建子目录的目标文件，必须在子目录下显式去构建
+add_subdirectory(source_dir [binary_dir] [EXCLUDE_FROM_ALL])
+
+# 将指定的源文件生成链接文件，然后添加到工程中去
+add_library(<name> [STATIC | SHARED | MODULE]
+            [EXCLUDE_FROM_ALL]
+            [source1] [source2] [...])
+
+# 将目标文件与库文件进行链接
+target_link_libraries(<target> [item1] [item2] [...]
+                      [[debug|optimized|general] <item>] ...)
+                   
+# 设置C++、C编译选项，同set(CMAKE_CXX_FLAGS/CMAKE_C_FLAGS <cmdstring>)
+# 常见的有：-fsanitize=thread(检测运行时的Data Race)、-fsanitize=address（检测运行时的内存错误）、-fno-omit-frame-pointer
+add_compile_options(<option> ...)
+
+add_executable(<name> [WIN32] [MACOSX_BUNDLE]
+               [EXCLUDE_FROM_ALL]
+               [source1] [source2 ...])
+
+# 引入第三方库，REQUIRED：
+find_package(<PackageName> [version] [EXACT] [QUIET]
+             [REQUIRED] [[COMPONENTS] [components...]]
+             [OPTIONAL_COMPONENTS components...]
+             [CONFIG|NO_MODULE]
+             [NO_POLICY_SCOPE]
+             [NAMES name1 [name2 ...]]
+             [CONFIGS config1 [config2 ...]]
+             [HINTS path1 [path2 ... ]]
+             [PATHS path1 [path2 ... ]]
+             [PATH_SUFFIXES suffix1 [suffix2 ...]]
+             [NO_DEFAULT_PATH]
+             [NO_PACKAGE_ROOT_PATH]
+             [NO_CMAKE_PATH]
+             [NO_CMAKE_ENVIRONMENT_PATH]
+             [NO_SYSTEM_ENVIRONMENT_PATH]
+             [NO_CMAKE_PACKAGE_REGISTRY]
+             [NO_CMAKE_BUILDS_PATH] # Deprecated; does nothing.
+             [NO_CMAKE_SYSTEM_PATH]
+             [NO_CMAKE_SYSTEM_PACKAGE_REGISTRY]
+             [CMAKE_FIND_ROOT_PATH_BOTH |
+              ONLY_CMAKE_FIND_ROOT_PATH |
+              NO_CMAKE_FIND_ROOT_PATH])
+
+# 对文件操作
+# Reading 读
+  file(READ <filename> <out-var> [...])
+  file(STRINGS <filename> <out-var> [...])
+  file(<HASH> <filename> <out-var>)
+  file(TIMESTAMP <filename> <out-var> [...])
+
+# Writing 写
+  file({WRITE | APPEND} <filename> <content>...)
+  file({TOUCH | TOUCH_NOCREATE} [<file>...])
+  file(GENERATE OUTPUT <output-file> [...])
+
+# Filesystem 常见文件操作
+  file({GLOB | GLOB_RECURSE} <out-var> [...] [<globbing-expr>...])
+  file(RENAME <oldname> <newname>)
+  file({REMOVE | REMOVE_RECURSE } [<files>...])
+  file(MAKE_DIRECTORY [<dir>...])
+  file({COPY | INSTALL} <file>... DESTINATION <dir> [...])
+  file(SIZE <filename> <out-var>)
+  file(READ_SYMLINK <linkname> <out-var>)
+  file(CREATE_LINK <original> <linkname> [...])
+
+# Path Conversion
+  file(RELATIVE_PATH <out-var> <directory> <file>)
+  file({TO_CMAKE_PATH | TO_NATIVE_PATH} <path> <out-var>)
+
+# Transfer 传输
+  file(DOWNLOAD <url> <file> [...])
+  file(UPLOAD <file> <url> [...])
+
+# Locking 加锁
+  file(LOCK <path> [...])
+  
+# string操作
+# Search and Replace 查找和替换
+  string(FIND <string> <substring> <out-var> [...])
+  string(REPLACE <match-string> <replace-string> <out-var> <input>...)
+
+# Regular Expressions 正则匹配
+  string(REGEX MATCH <match-regex> <out-var> <input>...)
+  string(REGEX MATCHALL <match-regex> <out-var> <input>...)
+  string(REGEX REPLACE <match-regex> <replace-expr> <out-var> <input>...)
+
+# Manipulation 常见字符串处理
+  string(APPEND <string-var> [<input>...])
+  string(PREPEND <string-var> [<input>...])
+  string(CONCAT <out-var> [<input>...])
+  string(JOIN <glue> <out-var> [<input>...])
+  string(TOLOWER <string1> <out-var>)
+  string(TOUPPER <string1> <out-var>)
+  string(LENGTH <string> <out-var>)
+  string(SUBSTRING <string> <begin> <length> <out-var>)
+  string(STRIP <string> <out-var>)
+  string(GENEX_STRIP <string> <out-var>)
+  string(REPEAT <string> <count> <out-var>)
+
+# Comparison 字符串比较
+  string(COMPARE <op> <string1> <string2> <out-var>)
+
+# Hashing
+  string(<HASH> <out-var> <input>)
+
+# Generation 生成字符串
+  string(ASCII <number>... <out-var>)
+  string(CONFIGURE <string1> <out-var> [...])
+  string(MAKE_C_IDENTIFIER <string> <out-var>)
+  string(RANDOM [<option>...] <out-var>)
+  string(TIMESTAMP <out-var> [<format string>] [UTC])
+  string(UUID <out-var> ...)
+  
+# install
+install(TARGETS <target>... [...])
+install({FILES | PROGRAMS} <file>... [...])
+install(DIRECTORY <dir>... [...])
+install(SCRIPT <file> [...])
+install(CODE <code> [...])
+install(EXPORT <export-name> [...])
 ```
 
 
@@ -155,20 +303,18 @@ toolChain脚本中几个比较常见的重要变量(具体见NDK的android.toolc
 #CMAKE_FIND_ROOT_PATH
 该变量是一个list，指定了一个或者多个优先于其他搜索路径的搜索路径。比如你设置了/opt/arm/，所有的Find_xxx.cmake都会优先根据这个路径下的/usr/lib,/lib等进行查找，然后才会去你自己的/usr/lib和/lib进行查找，如果你有一些库是不被包含在/opt/arm里面的，也可以显示指定多个值给CMAKE_FIND_ROOT_PATH
 #CMAKE_FIND_ROOT_PATH_MODE_PROGRAM
-对FIND_PROGRAM()起作用，有三种取值，NEVER,ONLY,BOTH,第一个表示不在你CMAKE_FIND_ROOT_PATH下进行查找，第二个表示只在这个路径下查找，第三个表示先查找这个路径，再查找全局路径，对于这个变量来说，一般都是调用宿主机的程序，所以一般都设置成NEVER
+对find_program()起作用，有三种取值，NEVER,ONLY,BOTH,第一个表示不在你CMAKE_FIND_ROOT_PATH下进行查找，第二个表示只在这个路径下查找，第三个表示先查找这个路径，再查找全局路径，对于这个变量来说，一般都是调用宿主机的程序，所以一般都设置成NEVER
 #CMAKE_FIND_ROOT_PATH_MODE_LIBRARY
-对FIND_LIBRARY()起作用，表示在链接的时候的库的相关选项，因此这里需要设置成ONLY来保证我们的库是在交叉环境中找的
+find_library()起作用，表示在链接的时候的库的相关选项，因此这里需要设置成ONLY来保证我们的库是在交叉环境中找的
 #CMAKE_FIND_ROOT_PATH_MODE_INCLUDE
-对FIND_PATH()和FIND_FILE()起作用，一般来说也是ONLY,如果你想改变，一般也是在相关的FIND命令中增加option来改变局部设置，有NO_CMAKE_FIND_ROOT_PATH,ONLY_CMAKE_FIND_ROOT_PATH,BOTH_CMAKE_FIND_ROOT_PATH
+对find_path()和find_file()起作用，一般来说也是ONLY,如果你想改变，一般也是在相关的FIND命令中增加option来改变局部设置，有NO_CMAKE_FIND_ROOT_PATH,ONLY_CMAKE_FIND_ROOT_PATH,BOTH_CMAKE_FIND_ROOT_PATH
 #CMAKE_FIND_ROOT_PATH_MODE_PACKAGE
-对FIND_PACKAGE()起作用，一般来说也是ONLY
+find_package()起作用，一般来说也是ONLY
 
 CMAKE_BINARY_DIR/PROJECT_BINARY_DIR:
 指的是同一个东西，工程编译发生的目录，如果是 in source编译（源码和编译同路径，稍微会有些混乱）,指得就是工程顶层目录,如果是 out of source 编译（在根目录中创建<build>目录进行编译）
 
 CMAKE_CURRENT_SOURCE_DIR:
 指的是当前处理的 CMakeLists.txt 所在的路径
-
-
 ```
 

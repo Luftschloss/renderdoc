@@ -97,6 +97,7 @@ set(RENDERDOC_APK_PATH "" CACHE STRING "Path to RenderDoc .apk files after insta
 set(LIB_SUFFIX "" CACHE STRING "Suffix for 'lib' folder in target directory structure. E.g. set to '64' to use /usr/local/lib64 instead of /usr/local/lib.")
 set(LIB_SUBFOLDER "" CACHE STRING "Subfolder under the 'lib' folder in target directory structure. E.g. set to 'renderdoc' to use /usr/local/lib/renderdoc instead of /usr/local/lib.")
 
+# 设置So工程相关宏
 if(NOT LIB_SUFFIX STREQUAL "")
     add_definitions(-DRENDERDOC_LIB_SUFFIX=${LIB_SUFFIX})
 endif()
@@ -176,6 +177,7 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/.git/HEAD")
     endif()
 endif()
 
+# 工程名RenderDoc，语言C++和C 
 project(RenderDoc CXX C)
 
 option(ENABLE_GL "Enable GL driver" ON)
@@ -191,6 +193,7 @@ option(ENABLE_XCB "Enable xcb windowing support" ON)
 option(ENABLE_WAYLAND "Enable experimental wayland windowing support" OFF)
 option(ENABLE_GGP "Enable GGP support" OFF)
 
+# 设置编译选项 主要是DataRace和内存问题的检测
 option(ENABLE_ASAN "Enable address sanitizer" OFF)
 option(ENABLE_TSAN "Enable thread sanitizer" OFF)
 option(ENABLE_MSAN "Enable memory sanitizer" OFF)
