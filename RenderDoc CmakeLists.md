@@ -79,7 +79,7 @@ mingw32-make
 
 #### 常用CMakeLists语法
 
-```makefile
+```cmake
 # 是否定义环境变量
 DEFINED ENV{env_name}
 # 是否存在路径
@@ -87,8 +87,8 @@ EXISTS "Path"
 # 获得STR变量的字符串值
 &{<variable>}
 
-# 字符串相等符
-STREQUAL
+# 字符串相等判断符
+<string1> STREQUAL <string2>
 
 # 项目名
 project(<PROJECT-NAME> [<language-name>...])
@@ -138,7 +138,7 @@ add_custom_command(OUTPUT output1 [output2 ...]
 
 # list变量
 list(LENGTH <list><output variable>)										#返回list的长度							
-list(GET <list> <elementindex> [<element index> ...]<output variable>) 		#返回list中index的element到value中
+list(GET <list> <elementindex> [<element index> ...]<output variable>) 			#返回list中index的element到value中
 list(APPEND <list><element> [<element> ...])								#添加新element到list中
 list(FIND <list> <value><output variable>)									#返回list中element的index，没有找到返回-1
 list(INSERT <list><element_index> <element> [<element> ...])				#将新element插入到list中index的位置
@@ -168,10 +168,20 @@ include_directories([AFTER|BEFORE] [SYSTEM] dir1 [dir2 ...])
 # 添加一个子目录并构建该子目录，子目录下应该包含CMakeLists.txt文件和代码文件。子目录可以是相对路径也可以是绝对路径，如果是相对路径，则是相对当前目录的一个相对路径，binary_dir指定输出目录，不指定默认为source_dir，EXCLUDE_FROM_ALL指定后子目录下的目标不会被父目录下的目标文件包含进去，父目录的CMakeLists.txt不会构建子目录的目标文件，必须在子目录下显式去构建
 add_subdirectory(source_dir [binary_dir] [EXCLUDE_FROM_ALL])
 
-# 将指定的源文件生成链接文件，然后添加到工程中去
+# add_library
+## 将指定的源文件生成链接文件，然后添加到工程中去，库的类型是STATIC(静态库)/SHARED(动态库)/MODULE(模块库)
 add_library(<name> [STATIC | SHARED | MODULE]
             [EXCLUDE_FROM_ALL]
             [source1] [source2] [...])
+## 导入已生成的库
+add_library(<name> <SHARED|STATIC|MODULE|OBJECT|UNKNOWN> IMPORTED
+            [GLOBAL])
+## 库的类型固定为OBJECT，这种库编译了源文件，但不链接
+add_library(<name> OBJECT <src>...)
+## 为给定library添加一个别名，后续可使用<name>来替代<target>
+add_library(<name> ALIAS <target>)
+## 创建一个接口库
+add_library(<name> INTERFACE [IMPORTED [GLOBAL]])
 
 # 将目标文件与库文件进行链接
 target_link_libraries(<target> [item1] [item2] [...]
@@ -181,11 +191,18 @@ target_link_libraries(<target> [item1] [item2] [...]
 # 常见的有：-fsanitize=thread(检测运行时的Data Race)、-fsanitize=address（检测运行时的内存错误）、-fno-omit-frame-pointer
 add_compile_options(<option> ...)
 
+# 指定源文件设置属性（编译），以<prop>:<value>键值对的形式
+set_source_files_properties(<files> ...
+                            [DIRECTORY <dirs> ...]
+                            [TARGET_DIRECTORY <targets> ...]
+                            PROPERTIES <prop1> <value1> [<prop2> <value2>] ...)
+
+# 添加编译目标
 add_executable(<name> [WIN32] [MACOSX_BUNDLE]
                [EXCLUDE_FROM_ALL]
                [source1] [source2 ...])
 
-# 引入第三方库，REQUIRED：
+# 引入第三方库，使用REQUIRED：必须有第三方库，没有找到的话CMake return faild
 find_package(<PackageName> [version] [EXACT] [QUIET]
              [REQUIRED] [[COMPONENTS] [components...]]
              [OPTIONAL_COMPONENTS components...]
@@ -210,18 +227,18 @@ find_package(<PackageName> [version] [EXACT] [QUIET]
               NO_CMAKE_FIND_ROOT_PATH])
 
 # 对文件操作
-# Reading 读
+## Reading 读
   file(READ <filename> <out-var> [...])
   file(STRINGS <filename> <out-var> [...])
   file(<HASH> <filename> <out-var>)
   file(TIMESTAMP <filename> <out-var> [...])
 
-# Writing 写
+## Writing 写
   file({WRITE | APPEND} <filename> <content>...)
   file({TOUCH | TOUCH_NOCREATE} [<file>...])
   file(GENERATE OUTPUT <output-file> [...])
 
-# Filesystem 常见文件操作
+## Filesystem 常见文件操作
   file({GLOB | GLOB_RECURSE} <out-var> [...] [<globbing-expr>...])
   file(RENAME <oldname> <newname>)
   file({REMOVE | REMOVE_RECURSE } [<files>...])
@@ -231,28 +248,28 @@ find_package(<PackageName> [version] [EXACT] [QUIET]
   file(READ_SYMLINK <linkname> <out-var>)
   file(CREATE_LINK <original> <linkname> [...])
 
-# Path Conversion
+## Path Conversion
   file(RELATIVE_PATH <out-var> <directory> <file>)
   file({TO_CMAKE_PATH | TO_NATIVE_PATH} <path> <out-var>)
 
-# Transfer 传输
+## Transfer 传输
   file(DOWNLOAD <url> <file> [...])
   file(UPLOAD <file> <url> [...])
 
-# Locking 加锁
+## Locking 加锁
   file(LOCK <path> [...])
   
 # string操作
-# Search and Replace 查找和替换
+## Search and Replace 查找和替换
   string(FIND <string> <substring> <out-var> [...])
   string(REPLACE <match-string> <replace-string> <out-var> <input>...)
 
-# Regular Expressions 正则匹配
+## Regular Expressions 正则匹配
   string(REGEX MATCH <match-regex> <out-var> <input>...)
   string(REGEX MATCHALL <match-regex> <out-var> <input>...)
   string(REGEX REPLACE <match-regex> <replace-expr> <out-var> <input>...)
 
-# Manipulation 常见字符串处理
+## Manipulation 常见字符串处理
   string(APPEND <string-var> [<input>...])
   string(PREPEND <string-var> [<input>...])
   string(CONCAT <out-var> [<input>...])
@@ -265,13 +282,13 @@ find_package(<PackageName> [version] [EXACT] [QUIET]
   string(GENEX_STRIP <string> <out-var>)
   string(REPEAT <string> <count> <out-var>)
 
-# Comparison 字符串比较
+## Comparison 字符串比较
   string(COMPARE <op> <string1> <string2> <out-var>)
 
-# Hashing
+## Hashing
   string(<HASH> <out-var> <input>)
 
-# Generation 生成字符串
+## Generation 生成字符串
   string(ASCII <number>... <out-var>)
   string(CONFIGURE <string1> <out-var> [...])
   string(MAKE_C_IDENTIFIER <string> <out-var>)
@@ -316,5 +333,544 @@ CMAKE_BINARY_DIR/PROJECT_BINARY_DIR:
 
 CMAKE_CURRENT_SOURCE_DIR:
 指的是当前处理的 CMakeLists.txt 所在的路径
+
+COMPILE_FLAGS:
+编译属性标识，常见GNUCXX编译属性有："-Wno-format-overflow"
 ```
 
+
+
+
+
+### RDC Android编译CMake工程结构
+
+代码仓库版本：Release/v1.17
+
+```cmake
+RDCProjectRoot
+├───CMakeLists.txt
+├───renderdoc
+    ├───CMakeLists.txt
+    ├───api/app/renderdoc_app.h
+    ├───api/replay/apidefs.h
+    ├───api/replay/capture_options.h
+    ├───api/replay/common_pipestate.h
+    ├───api/replay/pipestate.h
+    ├───api/replay/pipestate.inl
+    ├───api/replay/control_types.h
+    ├───api/replay/data_types.h
+    ├───api/replay/rdcarray.h
+    ├───api/replay/rdcdatetime.h
+    ├───api/replay/rdcflatmap.h
+    ├───api/replay/rdcpair.h
+    ├───api/replay/rdcstr.h
+    ├───api/replay/replay_enums.h
+    ├───api/replay/resourceid.h
+    ├───api/replay/shader_types.h
+    ├───api/replay/stringise.h
+    ├───api/replay/structured_data.h
+    ├───api/replay/version.h
+    ├───api/replay/gl_pipestate.h
+    ├───api/replay/vk_pipestate.h
+    ├───api/replay/renderdoc_replay.h
+    ├───api/replay/renderdoc_tostr.inl
+    ├───common/common.cpp
+    ├───common/common.h
+    ├───common/custom_assert.h
+    ├───common/dds_readwrite.cpp
+    ├───common/dds_readwrite.h
+    ├───common/formatting.h
+    ├───common/globalconfig.h
+    ├───common/shader_cache.h
+    ├───common/threading.h
+    ├───common/timing.h
+    ├───common/wrapped_pool.h
+    ├───common/threading_tests.cpp
+    ├───core/core.cpp
+    ├───core/image_viewer.cpp
+    ├───core/core.h
+    ├───core/crash_handler.h
+    ├───core/target_control.cpp
+    ├───core/remote_server.cpp
+    ├───core/remote_server.h
+    ├───core/settings.cpp
+    ├───core/settings.h
+    ├───core/replay_proxy.cpp
+    ├───core/replay_proxy.h
+    ├───core/intervals.h
+    ├───core/intervals_tests.cpp
+    ├───core/bit_flag_iterator.h
+    ├───core/bit_flag_iterator_tests.cpp
+    ├───android/android.cpp
+    ├───android/android_patch.cpp
+    ├───android/android_tools.cpp
+    ├───android/android_utils.cpp
+    ├───android/android_manifest.cpp
+    ├───android/android.h
+    ├───android/android_utils.h
+    ├───android/jdwp.h
+    ├───android/jdwp.cpp
+    ├───android/jdwp_util.cpp
+    ├───android/jdwp_connection.cpp
+    ├───core/plugins.cpp
+    ├───core/plugins.h
+    ├───core/resource_manager.cpp
+    ├───core/resource_manager.h
+    ├───core/sparse_page_table.cpp
+    ├───core/sparse_page_table.h
+    ├───data/glsl/glsl_ubos.h
+    ├───data/glsl/glsl_ubos_cpp.h
+    ├───hooks/hooks.cpp
+    ├───hooks/hooks.h
+    ├───maths/camera.cpp
+    ├───maths/camera.h
+    ├───maths/formatpacking.h
+    ├───maths/formatpacking.cpp
+    ├───maths/half_convert.h
+    ├───maths/matrix.cpp
+    ├───maths/matrix.h
+    ├───maths/quat.h
+    ├───maths/vec.cpp
+    ├───maths/vec.h
+    ├───os/os_specific.cpp
+    ├───os/os_specific.h
+    ├───replay/app_api.cpp
+    ├───replay/basic_types_tests.cpp
+    ├───replay/capture_options.cpp
+    ├───replay/dummy_driver.cpp
+    ├───replay/dummy_driver.h
+    ├───replay/renderdoc_serialise.inl
+    ├───replay/capture_file.cpp
+    ├───replay/entry_points.cpp
+    ├───replay/replay_driver.cpp
+    ├───replay/replay_driver.h
+    ├───replay/replay_output.cpp
+    ├───replay/replay_controller.cpp
+    ├───replay/replay_controller.h
+    ├───serialise/serialiser.cpp
+    ├───serialise/serialiser.h
+    ├───serialise/lz4io.cpp
+    ├───serialise/lz4io.h
+    ├───serialise/zstdio.cpp
+    ├───serialise/zstdio.h
+    ├───serialise/streamio.cpp
+    ├───serialise/streamio.h
+    ├───serialise/rdcfile.cpp
+    ├───serialise/rdcfile.h
+    ├───serialise/codecs/xml_codec.cpp
+    ├───serialise/codecs/chrome_json_codec.cpp
+    ├───serialise/comp_io_tests.cpp
+    ├───serialise/serialiser_tests.cpp
+    ├───serialise/streamio_tests.cpp
+    ├───strings/grisu2.cpp
+    ├───strings/string_utils.cpp
+    ├───strings/string_utils.h
+    ├───strings/utf8printf.cpp
+    ├───3rdparty/jpeg-compressor/jpgd.cpp
+    ├───3rdparty/jpeg-compressor/jpgd.h
+    ├───3rdparty/jpeg-compressor/jpge.cpp
+    ├───3rdparty/jpeg-compressor/jpge.h
+    ├───3rdparty/aosp/android_manifest.h
+    ├───3rdparty/catch/catch.cpp
+    ├───3rdparty/catch/catch.hpp
+    ├───3rdparty/pugixml/pugixml.cpp
+    ├───3rdparty/pugixml/pugixml.hpp
+    ├───3rdparty/pugixml/pugiconfig.hpp
+    ├───3rdparty/lz4/lz4.c
+    ├───3rdparty/lz4/lz4.h
+    ├───3rdparty/md5/md5.c
+    ├───3rdparty/md5/md5.h
+    ├───3rdparty/miniz/miniz.c
+    ├───3rdparty/miniz/miniz.h
+    ├───3rdparty/superluminal/superluminal.cpp
+    ├───3rdparty/superluminal/superluminal.h
+    ├───3rdparty/zstd/bitstream.h
+    ├───3rdparty/zstd/compiler.h
+    ├───3rdparty/zstd/cpu.h
+    ├───3rdparty/zstd/debug.c
+    ├───3rdparty/zstd/debug.h
+    ├───3rdparty/zstd/entropy_common.c
+    ├───3rdparty/zstd/error_private.c
+    ├───3rdparty/zstd/error_private.h
+    ├───3rdparty/zstd/fse.h
+    ├───3rdparty/zstd/fse_compress.c
+    ├───3rdparty/zstd/fse_decompress.c
+    ├───3rdparty/zstd/hist.c
+    ├───3rdparty/zstd/hist.h
+    ├───3rdparty/zstd/huf.h
+    ├───3rdparty/zstd/huf_compress.c
+    ├───3rdparty/zstd/huf_decompress.c
+    ├───3rdparty/zstd/mem.h
+    ├───3rdparty/zstd/pool.c
+    ├───3rdparty/zstd/pool.h
+    ├───3rdparty/zstd/threading.c
+    ├───3rdparty/zstd/threading.h
+    ├───3rdparty/zstd/xxhash.c
+    ├───3rdparty/zstd/xxhash.h
+    ├───3rdparty/zstd/zstd.h
+    ├───3rdparty/zstd/zstd_common.c
+    ├───3rdparty/zstd/zstd_compress.c
+    ├───3rdparty/zstd/zstd_compress_internal.h
+    ├───3rdparty/zstd/zstd_decompress.c
+    ├───3rdparty/zstd/zstd_double_fast.c
+    ├───3rdparty/zstd/zstd_double_fast.h
+    ├───3rdparty/zstd/zstd_errors.h
+    ├───3rdparty/zstd/zstd_fast.c
+    ├───3rdparty/zstd/zstd_fast.h
+    ├───3rdparty/zstd/zstd_internal.h
+    ├───3rdparty/zstd/zstd_lazy.c
+    ├───3rdparty/zstd/zstd_lazy.h
+    ├───3rdparty/zstd/zstd_ldm.c
+    ├───3rdparty/zstd/zstd_ldm.h
+    ├───3rdparty/zstd/zstd_opt.c
+    ├───3rdparty/zstd/zstd_opt.h
+    ├───3rdparty/zstd/zstdmt_compress.c
+    ├───3rdparty/zstd/zstdmt_compress.h
+    ├───3rdparty/stb/stb_image.h
+    ├───3rdparty/stb/stb_image_write.h
+    ├───3rdparty/stb/stb_image_resize.h
+    ├───3rdparty/stb/stb_impl.c
+    ├───3rdparty/stb/stb_truetype.h
+    ├───3rdparty/tinyexr/tinyexr.cpp
+    ├───3rdparty/tinyexr/tinyexr.h
+    ├───3rdparty/tinyfiledialogs/tinyfiledialogs.c
+    ├───3rdparty/tinyfiledialogs/tinyfiledialogs.h
+    ├───if(ANDROID)
+        ├───data/embedded_files.h
+        ├───os/posix/android/android_stringio.cpp
+        ├───os/posix/android/android_callstack.cpp
+        ├───os/posix/android/android_process.cpp
+        ├───os/posix/android/android_threading.cpp
+        ├───os/posix/android/android_hook.cpp
+        ├───os/posix/android/android_network.cpp
+        ├───os/posix/posix_network.h
+        ├───os/posix/posix_network.cpp
+        ├───os/posix/posix_process.cpp
+        ├───os/posix/posix_stringio.cpp
+        ├───os/posix/posix_threading.cpp
+        ├───os/posix/posix_specific.h
+    ├───driver/gl (ENABLE_GL OR ENABLE_GLES)
+        ├───CMakeLists.txt("rdoc_gl",OBJECT_LIBRARY)
+        ├───gl_common.cpp
+        ├───gl_common.h
+        ├───gl_counters.cpp
+        ├───gl_debug.cpp
+        ├───gl_postvs.cpp
+        ├───gl_overlay.cpp
+        ├───gl_outputwindow.cpp
+        ├─── gl_rendermesh.cpp
+        ├───gl_rendertexture.cpp
+        ├───gl_rendertext.cpp
+        ├───gl_msaa_array_conv.cpp
+        ├───gl_driver.cpp
+        ├───gl_driver.h
+        ├───gl_enum.h
+        ├───gl_dispatch_table_defs.h
+        ├───gl_dispatch_table.h
+        ├───gl_initstate.h
+        ├───gl_initstate.cpp
+        ├───gl_manager.cpp
+        ├───gl_manager.h
+        ├───gl_renderstate.cpp
+        ├───gl_renderstate.h
+        ├───gl_replay.cpp
+        ├───gl_replay.h
+        ├───gl_resources.cpp
+        ├───gl_resources.h
+        ├───gl_program_iterate.cpp
+        ├───gl_shader_refl.cpp
+        ├───gl_shader_refl.h
+        ├───gl_stringise.cpp
+        ├───official/gl32.h
+        ├───official/gl3platform.h
+        ├───official/glcorearb.h
+        ├───official/glext.h
+        ├───official/khrplatform.h
+        ├───wrappers/gl_buffer_funcs.cpp
+        ├───wrappers/gl_debug_funcs.cpp
+        ├───wrappers/gl_draw_funcs.cpp
+        ├───wrappers/gl_emulated.cpp
+        ├───wrappers/gl_framebuffer_funcs.cpp
+        ├───wrappers/gl_get_funcs.cpp
+        ├───wrappers/gl_interop_funcs.cpp
+        ├───wrappers/gl_query_funcs.cpp
+        ├───wrappers/gl_sampler_funcs.cpp
+        ├───wrappers/gl_shader_funcs.cpp
+        ├───wrappers/gl_state_funcs.cpp
+        ├───wrappers/gl_texture_funcs.cpp
+        ├───wrappers/gl_uniform_funcs.cpp
+        ├───if(ANDROID AND ENABLE_GL)
+            ├───official/glxext.h
+            ├───glx_dispatch_table.h
+            ├───glx_platform.cpp
+            ├───glx_hooks.cpp
+            ├───glx_fake_vk_hooks.cpp
+        ├───if(ANDROID AND ENABLE_GLES)
+            ├───official/glesext.h
+        ├───if(ANDROID AND ENABLE_EGL)
+            ├───official/egl.h
+            ├───official/eglext.h
+            ├───official/eglplatform.h
+            ├───egl_dispatch_table.h
+            ├───egl_platform.cpp
+            ├───egl_hooks.cpp
+    ├───driver/vulkan (ENABLE_VULKAN)
+        ├───CMakeLists.txt("rdoc_vulkan",OBJECT_LIBRARY)
+        ├───vk_common.cpp
+        ├───vk_common.h
+        ├───vk_next_chains.cpp
+        ├───vk_core.cpp
+        ├───vk_core.h
+        ├───vk_counters.cpp
+        ├───vk_debug.h
+        ├───vk_debug.cpp
+        ├───vk_postvs.cpp
+        ├───vk_shader_feedback.cpp
+        ├───vk_overlay.cpp
+        ├───vk_msaa_array_conv.cpp
+        ├───vk_outputwindow.cpp
+        ├───vk_rendermesh.cpp
+        ├───vk_rendertexture.cpp
+        ├───vk_rendertext.h
+        ├───vk_rendertext.cpp
+        ├───vk_shader_cache.h
+        ├───vk_shader_cache.cpp
+        ├───vk_dispatchtables.cpp
+        ├───vk_dispatchtables.h
+        ├───vk_dispatch_defs.h
+        ├───vk_hookset_defs.h
+        ├───vk_image_states.cpp
+        ├───vk_info.cpp
+        ├───vk_info.h
+        ├───vk_initstate.cpp
+        ├───vk_manager.cpp
+        ├───vk_manager.h
+        ├───vk_memory.cpp
+        ├───vk_pixelhistory.cpp
+        ├───vk_replay.cpp
+        ├───vk_replay.h
+        ├───vk_resources.cpp
+        ├───vk_resources.h
+        ├───vk_shaderdebug.cpp
+        ├───vk_state.cpp
+        ├───vk_state.h
+        ├───vk_serialise.cpp
+        ├───vk_stringise.cpp
+        ├───vk_layer.cpp
+        ├───imagestate_tests.cpp
+        ├───imgrefs_tests.cpp
+        ├───official/vk_layer.h
+        ├───official/vk_platform.h
+        ├───official/vulkan.h
+        ├───official/vulkan_android.h
+        ├───official/vulkan_core.h
+        ├───official/vulkan_ggp.h
+        ├───official/vulkan_ios.h
+        ├───official/vulkan_macos.h
+        ├───official/vulkan_fuchsia.h
+        ├───official/vulkan_vi.h
+        ├───official/vulkan_wayland.h
+        ├───official/vulkan_win32.h
+        ├───official/vulkan_xcb.h
+        ├───official/vulkan_xlib.h
+        ├───official/vulkan_xlib_xrandr.h
+        ├───wrappers/vk_cmd_funcs.cpp
+        ├───wrappers/vk_descriptor_funcs.cpp
+        ├───wrappers/vk_device_funcs.cpp
+        ├───wrappers/vk_draw_funcs.cpp
+        ├───wrappers/vk_dynamic_funcs.cpp
+        ├───wrappers/vk_get_funcs.cpp
+        ├───wrappers/vk_misc_funcs.cpp
+        ├───wrappers/vk_queue_funcs.cpp
+        ├───wrappers/vk_resource_funcs.cpp
+        ├───wrappers/vk_shader_funcs.cpp
+        ├───wrappers/vk_sync_funcs.cpp
+        ├───wrappers/vk_wsi_funcs.cpp
+        ├───if(ANDROID)
+        	├───vk_posix.cpp
+        	├───vk_android.cpp
+        	├───vk_layer_android.cpp
+    ├───driver/shaders/spirv (ENABLE_GL OR ENABLE_GLES OR ENABLE_VULKAN)
+        ├───CMakeLists.txt("rdoc_spirv",OBJECT_LIBRARY)
+        ├───glslang_compile.cpp
+        ├───glslang_compile.h
+        ├───spirv_common.cpp
+        ├───spirv_common.h
+        ├───spirv_editor.cpp
+        ├───spirv_editor.h
+        ├───spirv_gen.cpp
+        ├───spirv_gen.h
+        ├───spirv_op_helpers.h
+        ├───spirv_compile.cpp
+        ├───spirv_compile.h
+        ├───spirv_debug_setup.cpp
+        ├───spirv_debug_glsl450.cpp
+        ├───spirv_debug.cpp
+        ├───spirv_debug.h
+        ├───spirv_reflect.cpp
+        ├───spirv_reflect.h
+        ├───spirv_processor.cpp
+        ├───spirv_processor.h
+        ├───spirv_disassemble.cpp
+        ├───spirv_stringise.cpp
+        ├───var_dispatch_helpers.h
+        ├───(添加依赖的glslang_source_code)
+        ├───3rdparty/glslang/OGLCompilersDLL/InitializeDll.cpp
+        ├───3rdparty/glslang/OGLCompilersDLL/InitializeDll.h
+        ├───3rdparty/glslang/SPIRV/GlslangToSpv.cpp
+        ├───3rdparty/glslang/SPIRV/GlslangToSpv.h
+        ├───3rdparty/glslang/SPIRV/GLSL.std.450.h
+        ├───3rdparty/glslang/SPIRV/GLSL.ext.AMD.h
+        ├───3rdparty/glslang/SPIRV/GLSL.ext.EXT.h
+        ├───3rdparty/glslang/SPIRV/GLSL.ext.KHR.h
+        ├───3rdparty/glslang/SPIRV/GLSL.ext.NV.h
+        ├───3rdparty/glslang/SPIRV/hex_float.h
+        ├───3rdparty/glslang/SPIRV/InReadableOrder.cpp
+        ├───3rdparty/glslang/SPIRV/Logger.cpp
+        ├───3rdparty/glslang/SPIRV/Logger.h
+        ├───3rdparty/glslang/SPIRV/SpvBuilder.cpp
+        ├───3rdparty/glslang/SPIRV/SpvBuilder.h
+        ├───3rdparty/glslang/SPIRV/SpvTools.cpp
+        ├───3rdparty/glslang/SPIRV/SpvTools.h
+        ├───3rdparty/glslang/SPIRV/SpvPostProcess.cpp
+        ├───3rdparty/glslang/SPIRV/spvIR.h
+        ├───3rdparty/glslang/glslang/GenericCodeGen/CodeGen.cpp
+        ├───3rdparty/glslang/glslang/GenericCodeGen/Link.cpp
+        ├───3rdparty/glslang/glslang/Include/arrays.h
+        ├───3rdparty/glslang/glslang/Include/BaseTypes.h
+        ├───3rdparty/glslang/glslang/Include/Common.h
+        ├───3rdparty/glslang/glslang/Include/ConstantUnion.h
+        ├───3rdparty/glslang/glslang/Include/InfoSink.h
+        ├───3rdparty/glslang/glslang/Include/InitializeGlobals.h
+        ├───3rdparty/glslang/glslang/Include/intermediate.h
+        ├───3rdparty/glslang/glslang/Include/PoolAlloc.h
+        ├───3rdparty/glslang/glslang/Include/ResourceLimits.h
+        ├───3rdparty/glslang/glslang/Include/revision.h
+        ├───3rdparty/glslang/glslang/Include/ShHandle.h
+        ├───3rdparty/glslang/glslang/Include/Types.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/Constant.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/glslang_tab.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/glslang_tab.cpp.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/gl_types.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/iomapper.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/iomapper.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/gl_types.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/InfoSink.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/Initialize.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/Initialize.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/Intermediate.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/intermOut.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/IntermTraverse.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/limits.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/linkValidate.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/LiveTraverser.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/localintermediate.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/parseConst.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/ParseContextBase.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/ParseHelper.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/ParseHelper.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/PoolAlloc.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/propagateNoContraction.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/propagateNoContraction.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/preprocessor/PpAtom.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/preprocessor/PpContext.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/preprocessor/PpContext.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/preprocessor/Pp.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/preprocessor/PpScanner.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/preprocessor/PpTokens.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/preprocessor/PpTokens.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/reflection.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/reflection.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/RemoveTree.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/RemoveTree.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/ScanContext.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/Scan.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/Scan.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/ShaderLang.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/SymbolTable.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/SymbolTable.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/Versions.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/Versions.h
+        ├───3rdparty/glslang/glslang/MachineIndependent/attribute.cpp
+        ├───3rdparty/glslang/glslang/MachineIndependent/attribute.h
+        ├───3rdparty/glslang/glslang/OSDependent/osinclude.h
+        ├───3rdparty/glslang/glslang/Public/ShaderLang.h)
+    ├───ihv(Independent Hardware Vendor,独立硬件供应商,下面是针对不同硬件的库适配代码)
+    ├───driver/ihv/amd
+        ├───CMakeLists.txt(rdoc_amd,OBJECT_LIBRARY)
+        ├───amd_counters.cpp
+        ├───amd_counters.h
+        ├───amd_isa.cpp
+        ├───amd_isa.h
+        ├───amd_isa_devices.cpp
+        ├───amd_isa_devices.h
+        ├───amd_isa_posix.cpp
+        ├───amd_rgp.cpp
+        ├───amd_rgp.h
+        ├───official/RGP/DevDriverAPI.h
+    ├───driver/ihv/intel(ENABLE_GL OR ENABLE_GLES)
+        ├───CMakeLists.txt(rdoc_intel,OBJECT_LIBRARY)
+        ├───intel_gl_counters.cpp
+        ├───intel_gl_counters.h
+    ├───driver/ihv/arm(ENABLE_GL OR ENABLE_GLES)
+        ├───CMakeLists.txt(rdoc_arm,OBJECT_LIBRARY)
+        ├───arm_counters.h
+        ├───arm_counters.cpp
+        ├───official/lizard/include/lizard/lizard_api.h
+        ├───official/lizard/lizard_api.cpp
+        ├───official/lizard/include/lizard/lizard.hpp
+        ├───official/lizard/lizard.cpp
+        ├───official/lizard/lizard_counter.cpp
+        ├───official/lizard/lizard_communication.hpp
+        ├───official/lizard/lizard_communication.cpp
+        ├───official/lizard/hwcpipe_communication.hpp
+        ├───official/lizard/hwcpipe_communication.cpp
+        ├───official/lizard/hwcpipe_api.hpp
+        ├───official/lizard/hwcpipe_api.cpp
+        ├───official/lizard/gatord_xml_reader.cpp
+        ├───official/lizard/gator_api.cpp
+        ├───official/lizard/gator_constants.hpp
+        ├───official/lizard/gator_message.cpp
+        ├───official/lizard/gator_message.hpp
+        ├───official/lizard/message_util.cpp
+        ├───official/lizard/message_util.hpp
+        ├───official/lizard/socket.cpp
+        ├───official/lizard/thirdparty/hwcpipe/hwcpipe.h
+        ├───official/lizard/thirdparty/hwcpipe/hwcpipe.cpp
+        ├───official/lizard/thirdparty/hwcpipe/cpu_profiler.h
+        ├───official/lizard/thirdparty/hwcpipe/gpu_profiler.h
+        ├───official/lizard/thirdparty/hwcpipe/value.h
+        ├───official/lizard/thirdparty/hwcpipe/vendor/arm/mali/hwc.hpp
+        ├───official/lizard/thirdparty/hwcpipe/vendor/arm/mali/hwc_names.hpp
+        ├───official/lizard/thirdparty/hwcpipe/vendor/arm/mali/mali_profiler.h
+        ├───official/lizard/thirdparty/hwcpipe/vendor/arm/mali/mali_profiler.cpp
+        ├───official/lizard/thirdparty/hwcpipe/vendor/arm/pmu/pmu_counter.h
+        ├───official/lizard/thirdparty/hwcpipe/vendor/arm/pmu/pmu_counter.cpp
+        ├───official/lizard/thirdparty/hwcpipe/vendor/arm/pmu/pmu_profiler.h
+        ├───official/lizard/thirdparty/hwcpipe/vendor/arm/pmu/pmu_profiler.cpp
+        ├───if((NOT ANDROID))
+        	├───arm_counters_stub.cpp
+    ├───3rdparty/interceptor-lib/lib(ANDROID AND USE_INTERCEPTOR_LIB，Android下通过USE_INTERCEPTOR_LIB打开，默认关闭，需要LLVM编译器，用途未知)
+        ├───CMakeLists.txt("interceptor_lib",OBJECT_LIBRARY)
+        ├───code_generator.cc
+        ├───constant_pool_data_expr.cc
+        ├───disassembler.cc
+        ├───error.cc
+        ├───interceptor.cc
+        ├───linker.cc
+        ├───memory_manager.cc
+        ├───target.cc
+        ├───${LLVM_TARGETS_TO_BUILD}/target_${TARGET}.cc
+├───qrenderdoc(ENABLE_QRENDERDOC/ENABLE_PYRENDERDOC)
+    ├───CMakeLists.txt
+└───renderdoccmd(ENABLE_RENDERDOCCMD)
+    ├───CMakeLists.txt
+```
+
+
+
+### CMake NDK 交叉编译
+
+可参考：https://developer.android.google.cn/ndk/guides/cmake?hl=zh-cn
+
+#### 编译APK的Demo
