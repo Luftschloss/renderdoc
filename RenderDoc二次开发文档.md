@@ -48,25 +48,36 @@ adb shell am start -D -n <package_name>/com.unity3d.player.UnityPlayerActivity
 ADB常用命令行：
 
 ```shell
-#查看Android手机SDK版本
+# 查看Android手机SDK版本
 adb shell getprop ro.build.version.sdk
 
-#查看Android手机所有配置设置
+# 查看Android手机所有配置设置
 adb shell getprop
 
-#关闭正在运行的Activity
+# 关闭正在运行的Activity
 adb shell am force-stop <package_name>
 
-#移除存在Socket端口监听--
+# 移除存在Socket端口监听--
 adb forward --remove tcp:xxx
-#查看所有的转发连接
+# 查看所有的转发连接
 adb forward --list
-#创建一个转发：将PC端11111端口收到的数据转发给手机上的22222端口
-adb forward tcp:11111 tcp:22222
-#要建立连接还需要
-（a）在手机端，建立一个端口为22222的server，并打开server到监听状态。
-（b）在PC端，建立一个socket client端，连接到端口为11111的server上。
+# adb建立数据转发相关命令
+adb forward <local> <remote> tcp:<port>
+                             localabstract:<unix domain socket name>
+                             localreserved:<unix domain socket name>
+                             localfilesystem:<unix domain socket name>
+                             dev:<character device name>
+                             jdwp:<process pid> (remote only)
+                             
+# 例如：创建一个转发，将PC端B端口收到的数据转发给手机上的C端口
+adb forward tcp:PortB tcp:PortC
+# 要建立连接还需要
+（a）在手机端，建立一个端口为PortC的server，并打开server到监听状态。
+（b）在PC端，建立一个socket client端，连接到端口为PortB的server上。
+（c）adb forward会建立一个转发服务
 ```
+
+![image-20220304190244661](Images/image-20220304190244661.png)
 
 jdwp Hook流程
 

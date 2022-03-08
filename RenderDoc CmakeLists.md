@@ -97,6 +97,8 @@ project(<PROJECT-NAME> [<language-name>...])
 # PARENT_SCOPE调高变量作用域到父目录或调用该函数处（PARENT_SCOPE和CACHE互斥）
 set(<variable> <value>
       [[CACHE <type> <docstring> [FORCE]] | PARENT_SCOPE])
+# 移除变量
+unset(<variable> [CACHE | PARENT_SCOPE])
 
 # 定义一个Bool变量，值为ON或OFF，默认为OFF，通过命令行可以选择性开关
 option(<variable> <docstring> [value])
@@ -869,7 +871,7 @@ RDCProjectRoot
         ├───memory_manager.cc
         ├───target.cc
         ├───${LLVM_TARGETS_TO_BUILD}/target_${TARGET}.cc
-├───qrenderdoc(ENABLE_QRENDERDOC/ENABLE_PYRENDERDOC, Android编译不包含这部分代码)
+├───qrenderdoc(ENABLE_QRENDERDOC/ENABLE_PYRENDERDOC, Android编译不包含这部分代码，应该是QT编译相关，所以不做展开)
         ├───CMakeLists.txt
 └───renderdoccmd(ENABLE_RENDERDOCCMD)
     ├───CMakeLists.txt
