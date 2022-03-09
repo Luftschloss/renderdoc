@@ -39,7 +39,7 @@ RDOC_CONFIG(uint32_t, Android_MaxConnectTimeout, 30,
             "Maximum time in seconds to try connecting to the target app before giving up. "
             "Useful primarily for apps that take a very long time to start up.");
 
-RDOC_CONFIG(bool, Android_Debug_ProcessLaunch, false,
+RDOC_CONFIG(bool, Android_Debug_ProcessLaunch, true,
             "Output verbose debug logging messages when launching android apps.");
 
 namespace Android
@@ -307,18 +307,19 @@ bool CheckAndroidServerVersion(const rdcstr &deviceID, ABI abi)
   // Compare the server's versionCode and versionName with the host's for compatibility
   rdcstr hostVersionCode =
       rdcstr(STRINGIZE(RENDERDOC_VERSION_MAJOR)) + rdcstr(STRINGIZE(RENDERDOC_VERSION_MINOR));
-  rdcstr hostVersionName = GitVersionHash;
+  //rdcstr hostVersionName = GitVersionHash;
 
   // False positives will hurt us, so check for explicit matches
-  if((hostVersionCode == versionCode) && (hostVersionName == versionName))
+  if((hostVersionCode == versionCode) /*&& (hostVersionName == versionName)*/)
   {
     RDCLOG("Installed server version (%s:%s) is compatible", versionCode.c_str(),
            versionName.c_str());
     return true;
   }
-
-  RDCWARN("RenderDoc server versionCode:versionName (%s:%s) is incompatible with host (%s:%s)",
-          versionCode.c_str(), versionName.c_str(), hostVersionCode.c_str(), hostVersionName.c_str());
+  RDCWARN("RenderDoc server versionCode:versionName (%s:%s) is incompatible with host (%s)",
+          versionCode.c_str(), versionName.c_str(), hostVersionCode.c_str());
+  /*RDCWARN("RenderDoc server versionCode:versionName (%s:%s) is incompatible with host (%s:%s)",
+          versionCode.c_str(), versionName.c_str(), hostVersionCode.c_str(), hostVersionName.c_str());*/
 
   return false;
 }
