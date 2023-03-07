@@ -493,7 +493,7 @@ void CaptureDialog::vulkanLayerWarn_mouseClick()
 #if defined(Q_OS_LINUX)
         QDir binDir = QFileInfo(qApp->applicationFilePath()).absoluteDir();
 
-        QString cmd = lit("renderdoccmd");
+        QString cmd = lit("uwaclient");
 
         if(binDir.exists(cmd))
         {
@@ -507,10 +507,10 @@ void CaptureDialog::vulkanLayerWarn_mouseClick()
           if(inPath.isEmpty())
           {
             RDDialog::critical(
-                this, tr("Can't locate renderdoccmd"),
-                tr("On linux we must run renderdoccmd as root to register the layer, because "
+                this, tr("Can't locate uwaclient"),
+                tr("On linux we must run uwaclient as root to register the layer, because "
                    "graphical applications like qrenderdoc may fail to launch.\n\n"
-                   "renderdoccmd could not be located either next to this qrenderdoc executable or "
+                   "uwaclient could not be located either next to this qrenderdoc executable or "
                    "in PATH."));
             return;
           }

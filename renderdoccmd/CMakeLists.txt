@@ -61,7 +61,7 @@ endif()
 
 if(ANDROID)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LINKER_FLAGS}")
-    add_library(renderdoccmd SHARED ${sources})
+    add_library(uwaclient SHARED ${sources})
 else()
     set(CMAKE_SKIP_BUILD_RPATH TRUE)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
@@ -73,13 +73,13 @@ else()
     endif()
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINKER_FLAGS}")
 
-    add_executable(renderdoccmd ${sources})
+    add_executable(uwaclient ${sources})
 endif()
 
-target_include_directories(renderdoccmd ${includes})
-target_link_libraries(renderdoccmd ${libraries})
+target_include_directories(uwaclient ${includes})
+target_link_libraries(uwaclient ${libraries})
 
-install (TARGETS renderdoccmd DESTINATION bin)
+install (TARGETS uwaclient DESTINATION bin)
 
 if(ANDROID)
     # Android sets this to off becuase Android is always terrible forever.
@@ -101,10 +101,10 @@ if(ANDROID)
     message(STATUS "Using Java of version ${Java_VERSION}")
 
     if(STRIP_ANDROID_LIBRARY AND ANDROID_STRIP_TOOL AND RELEASE_MODE)
-        add_custom_command(TARGET renderdoccmd POST_BUILD
-            COMMAND echo Stripping $<TARGET_FILE:renderdoccmd>
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:renderdoccmd> $<TARGET_FILE:renderdoccmd>.dbg
-            COMMAND ${ANDROID_STRIP_TOOL} --strip-unneeded $<TARGET_FILE:renderdoccmd>)
+        add_custom_command(TARGET uwaclient POST_BUILD
+            COMMAND echo Stripping $<TARGET_FILE:uwaclient>
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:uwaclient> $<TARGET_FILE:uwaclient>.dbg
+            COMMAND ${ANDROID_STRIP_TOOL} --strip-unneeded $<TARGET_FILE:uwaclient>)
     endif()
 
     set(ANDROID_BUILD_TOOLS_VERSION "" CACHE STRING "Version of Android build-tools to use instead of the default")
@@ -191,27 +191,27 @@ if(ANDROID)
         message(FATAL_ERROR "ABI ${ANDROID_ABI} is not supported.")
     endif()
 
-    set(RENDERDOC_ANDROID_PACKAGE_NAME "org.renderdoc.renderdoccmd.${ABI_EXTENSION_NAME}")
+    set(UWACLIENT_ANDROID_PACKAGE_NAME "com.uwa.uwaclient.${ABI_EXTENSION_NAME}")
 
-    set(APK_FILE ${CMAKE_BINARY_DIR}/bin/${RENDERDOC_ANDROID_PACKAGE_NAME}.apk)
+    set(APK_FILE ${CMAKE_BINARY_DIR}/bin/${UWACLIENT_ANDROID_PACKAGE_NAME}.apk)
     add_custom_target(apk ALL
                       DEPENDS ${APK_FILE})
 
     # Copy in android package files, replacing the package name with the architecture-specific package name
-    configure_file(android/Loader.java ${CMAKE_CURRENT_BINARY_DIR}/src/org/renderdoc/renderdoccmd/Loader.java)
+    configure_file(android/Loader.java ${CMAKE_CURRENT_BINARY_DIR}/src/com/uwa/uwaclient/Loader.java)
     configure_file(android/AndroidManifest.xml ${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml)
     configure_file(android/icon.png ${CMAKE_CURRENT_BINARY_DIR}/res/drawable/icon.png COPYONLY)
 
     add_custom_command(OUTPUT ${APK_FILE}
                        DEPENDS renderdoc
-                       DEPENDS renderdoccmd
+                       DEPENDS uwaclient
                        DEPENDS ${KEYSTORE}
                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                        COMMAND ${CMAKE_COMMAND} -E make_directory libs/lib/${ANDROID_ABI}
                        COMMAND ${CMAKE_COMMAND} -E make_directory obj
                        COMMAND ${CMAKE_COMMAND} -E make_directory bin
                        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:renderdoc> libs/lib/${ANDROID_ABI}/$<TARGET_FILE_NAME:renderdoc>
-                       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:renderdoccmd> libs/lib/${ANDROID_ABI}/$<TARGET_FILE_NAME:renderdoccmd>
+                       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:uwaclient> libs/lib/${ANDROID_ABI}/$<TARGET_FILE_NAME:uwaclient>
                        )
 
     if(ENABLE_ASAN)
@@ -252,12 +252,12 @@ if(ANDROID)
     if(NOT EXISTS ${D8_SCRIPT})
         set(DEX_COMMAND ${BUILD_TOOLS}/dx${TOOL_SCRIPT_EXTENSION} --dex --output=bin/classes.dex ./obj)
     else()
-        set(DEX_COMMAND ${D8_SCRIPT} --output ./bin/ ./obj/org/renderdoc/renderdoccmd/${ABI_EXTENSION_NAME}/*.class)
+        set(DEX_COMMAND ${D8_SCRIPT} --output ./bin/ ./obj/com/uwa/uwaclient/${ABI_EXTENSION_NAME}/*.class)
     endif()
 
     add_custom_command(OUTPUT ${APK_FILE} APPEND
                        COMMAND ${BUILD_TOOLS}/aapt package -f -m -S res -J src -M AndroidManifest.xml -I ${ANDROID_JAR}
-                       COMMAND ${JAVA_BIN}/javac -d ./obj -source 1.7 -target 1.7 -bootclasspath ${RT_JAR} -classpath "${CLASS_PATH}" -sourcepath src src/org/renderdoc/renderdoccmd/*.java
+                       COMMAND ${JAVA_BIN}/javac -d ./obj -source 1.7 -target 1.7 -bootclasspath ${RT_JAR} -classpath "${CLASS_PATH}" -sourcepath src src/com/uwa/uwaclient/*.java
                        COMMAND ${DEX_COMMAND}
                        COMMAND ${BUILD_TOOLS}/aapt package -f -M AndroidManifest.xml --version-code ${APK_VERSION_CODE} --version-name ${APK_VERSION_NAME} -S res -I ${ANDROID_JAR} -F RenderDocCmd-unaligned.apk bin libs
                        COMMAND ${BUILD_TOOLS}/zipalign -f 4 RenderDocCmd-unaligned.apk RenderDocCmd.apk

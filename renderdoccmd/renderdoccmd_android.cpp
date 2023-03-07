@@ -35,7 +35,7 @@
 #include <android_native_app_glue.h>
 
 #include <android/log.h>
-#define ANDROID_LOG(...) __android_log_print(ANDROID_LOG_INFO, "renderdoccmd", __VA_ARGS__);
+#define ANDROID_LOG(...) __android_log_print(ANDROID_LOG_INFO, "uwaclient", __VA_ARGS__);
 
 struct android_app *android_state;
 pthread_t cmdthread_handle = 0;
@@ -200,18 +200,18 @@ uniform vec2 iResolution;
 
 void main()
 {
-  vec2 uv = gl_FragCoord.xy / iResolution.xy;
+  // vec2 uv = gl_FragCoord.xy / iResolution.xy;
 
   // centre the UVs in a square. This assumes a landscape layout.
-  uv.x = 0.5 - (uv.x - 0.5) * (iResolution.x / iResolution.y);
+  // uv.x = 0.5 - (uv.x - 0.5) * (iResolution.x / iResolution.y);
 
   // this constant here can be tuned depending on DPI to increase AA
-  float edgeWidth = 10.0/max(iResolution.x, iResolution.y);
+  // float edgeWidth = 10.0/max(iResolution.x, iResolution.y);
 
-  float smoothdist = smoothstep(0.0, edgeWidth, clamp(logo(uv), 0.0, 1.0));
+  // float smoothdist = smoothstep(0.0, edgeWidth, clamp(logo(uv), 0.0, 1.0));
 
-  // the green is #3bb779
-  gl_FragColor = mix(vec4(1.0), vec4(0.2314, 0.7176, 0.4745, 1.0), smoothdist);
+  // gl_FragColor = mix(vec4(1.0), vec4(0.008, 0.420, 1.0, 1.0), smoothdist);
+  gl_FragColor = vec4(0.008, 0.420, 1.0, 1.0);
 }
 )";
 
@@ -386,12 +386,12 @@ std::vector<std::string> getRenderdoccmdArgs()
       env->GetMethodID(icl, "getStringExtra", "(Ljava/lang/String;)Ljava/lang/String;");
 
   jstring jsParam1 =
-      (jstring)env->CallObjectMethod(intent, gseid, env->NewStringUTF("renderdoccmd"));
+      (jstring)env->CallObjectMethod(intent, gseid, env->NewStringUTF("uwaclient"));
 
   std::vector<std::string> ret;
   if(jsParam1)    // Check if arg value found
   {
-    ret.push_back("renderdoccmd");
+    ret.push_back("uwaclient");
     const char *param1 = env->GetStringUTFChars(jsParam1, 0);
     std::istringstream iss(param1);
     while(iss)

@@ -509,7 +509,7 @@ void RenderDoc::Initialise()
 
     // only create crash handler when we're not in renderdoccmd.exe (to prevent infinite loop as
     // the crash handler itself launches renderdoccmd.exe)
-    if(!f.contains("renderdoccmd.exe"))
+    if(!f.contains("uwaclient.exe"))
     {
       RecreateCrashHandler();
     }

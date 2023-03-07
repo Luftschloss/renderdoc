@@ -144,6 +144,7 @@ bool is_exr_file(FILE *f)
 */
 
 static const uint32_t MAGIC_HEADER = MAKE_FOURCC('R', 'D', 'O', 'C');
+static const uint32_t MAGIC_HEADER_UWA = MAKE_FOURCC('U', 'W', 'A', 'C');
 
 namespace
 {
@@ -151,7 +152,7 @@ struct FileHeader
 {
   FileHeader()
   {
-    magic = MAGIC_HEADER;
+    magic = MAGIC_HEADER_UWA;
     version = RDCFile::SERIALISE_VERSION;
     headerLength = 0;
     RDCEraseEl(progVersion);
@@ -335,10 +336,9 @@ void RDCFile::Init(StreamReader &reader)
     RETURNERROR(ContainerError::FileIO, "I/O error reading magic number");
   }
 
-  if(header.magic != MAGIC_HEADER)
+  if(header.magic != MAGIC_HEADER && header.magic != MAGIC_HEADER_UWA)
   {
-    RETURNERROR(ContainerError::Corrupt, "Invalid capture file. Expected magic %08x, got %08x.",
-                MAGIC_HEADER, (uint32_t)header.magic);
+    RETURNERROR(ContainerError::Corrupt, "Invalid capture file");
   }
 
   m_SerVer = header.version;
