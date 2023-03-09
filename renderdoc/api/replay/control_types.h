@@ -705,7 +705,7 @@ struct CaptureFileFormat
       return convertSupported < o.convertSupported;
     return false;
   }
-  DOCUMENT("The file of the format as a single minimal string, e.g. ``rdc``.");
+  DOCUMENT("The file of the format as a single minimal string, e.g. ``capture``.");
   rdcstr extension;
 
   DOCUMENT("A human readable short phrase naming the file format.");

@@ -433,7 +433,7 @@ MainWindow::MainWindow(ICaptureContext &ctx) : QMainWindow(NULL), ui(new Ui::Mai
 
     for(const CaptureFileFormat &fmt : formats)
     {
-      if(fmt.extension == "rdc")
+      if(fmt.extension == "capture")
         continue;
 
       if(fmt.openSupported)
@@ -537,7 +537,7 @@ void MainWindow::on_action_Open_Capture_triggered()
 
   QString filename = RDDialog::getOpenFileName(
       this, tr("Select file to open"), m_Ctx.Config().LastCaptureFilePath,
-      tr("Capture Files (*.rdc);;Image Files (*.dds *.hdr *.exr *.bmp *.jpg "
+      tr("Capture Files (*.capture);;Image Files (*.dds *.hdr *.exr *.bmp *.jpg "
          "*.jpeg *.png *.tga *.gif *.psd);;All Files (*)"));
 
   if(!filename.isEmpty())
@@ -625,7 +625,7 @@ void MainWindow::LoadFromFilename(const QString &filename, bool temporary)
   QFileInfo path(filename);
   QString ext = path.suffix().toLower();
 
-  if(ext == lit("rdc"))
+  if(ext == lit("capture"))
   {
     LoadCapture(filename, m_Ctx.Config().DefaultReplayOptions, temporary, true);
   }
@@ -792,7 +792,7 @@ void MainWindow::LoadCapture(const QString &filename, const ReplayOptions &opts,
     {
       ICaptureFile *file = RENDERDOC_OpenCaptureFile();
 
-      ReplayStatus status = file->OpenFile(filename, "rdc", NULL);
+      ReplayStatus status = file->OpenFile(filename, "capture", NULL);
 
       if(status != ReplayStatus::Succeeded)
       {
@@ -983,7 +983,7 @@ QString MainWindow::GetSavePath(QString title, QString filter)
     title = tr("Save Capture As");
 
   if(filter.isEmpty())
-    filter = tr("Capture Files (*.rdc)");
+    filter = tr("Capture Files (*.capture)");
 
   QString filename = RDDialog::getSaveFileName(this, title, dir, filter);
 

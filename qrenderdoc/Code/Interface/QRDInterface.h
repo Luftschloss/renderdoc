@@ -1746,15 +1746,15 @@ time.
   DOCUMENT("Close the currently open capture file.");
   virtual void CloseCapture() = 0;
 
-  DOCUMENT(R"(Imports a capture file from a non-native format, via conversion to temporary rdc.
+  DOCUMENT(R"(Imports a capture file from a non-native format, via conversion to temporary capture.
 
-This converts the file to a specified temporary .rdc and loads it, closing any existing capture.
+This converts the file to a specified temporary .capture and loads it, closing any existing capture.
 
 The capture must be available locally, if it's not this function will fail.
 
 :param renderdoc.CaptureFileFormat fmt: The capture file format to import from.
 :param str importfile: The path to import from.
-:param str rdcfile: The temporary path to save the rdc file to.
+:param str rdcfile: The temporary path to save the capture file to.
 :return: ``True`` if the import operation was successful and the capture was loaded.
 :rtype: bool
 )");

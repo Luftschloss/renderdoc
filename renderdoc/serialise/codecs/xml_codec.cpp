@@ -290,7 +290,7 @@ static ReplayStatus Structured2XML(const rdcstr &filename, const RDCFile &file, 
 {
   pugi::xml_document doc;
 
-  pugi::xml_node xRoot = doc.append_child("rdc");
+  pugi::xml_node xRoot = doc.append_child(RENDERDOC_CAPTURE_FILE_SUFFIX);
 
   {
     pugi::xml_node xHeader = xRoot.append_child("header");
@@ -586,11 +586,11 @@ static ReplayStatus XML2Structured(const rdcstr &xml, const ThumbTypeAndData &th
   pugi::xml_document doc;
   doc.load_string(xml.c_str());
 
-  pugi::xml_node root = doc.child("rdc");
+  pugi::xml_node root = doc.child(RENDERDOC_CAPTURE_FILE_SUFFIX);
 
   if(!root)
   {
-    RDCERR("Malformed document, expected rdc node");
+    RDCERR("Malformed document, expected capture node");
     return ReplayStatus::FileCorrupted;
   }
 

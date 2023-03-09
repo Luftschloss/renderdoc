@@ -1238,7 +1238,7 @@ RDCFile *RenderDoc::CreateRDC(RDCDriver driver, uint32_t frameNum, const FramePi
   if(frameNum == ~0U)
     suffix = "_capture";
 
-  m_CurrentLogFile = StringFormat::Fmt("%s%s.rdc", m_CaptureFileTemplate.c_str(), suffix.c_str());
+  m_CurrentLogFile = StringFormat::Fmt("%s%s.%s", m_CaptureFileTemplate.c_str(), suffix.c_str(), RENDERDOC_CAPTURE_FILE_SUFFIX);
 
   // make sure we don't stomp another capture if we make multiple captures in the same frame.
   {
@@ -1249,7 +1249,7 @@ RDCFile *RenderDoc::CreateRDC(RDCDriver driver, uint32_t frameNum, const FramePi
           }) != m_Captures.end())
     {
       m_CurrentLogFile =
-          StringFormat::Fmt("%s%s_%d.rdc", m_CaptureFileTemplate.c_str(), suffix.c_str(), altnum);
+          StringFormat::Fmt("%s%s_%d.%s", m_CaptureFileTemplate.c_str(), suffix.c_str(), altnum, RENDERDOC_CAPTURE_FILE_SUFFIX);
       altnum++;
     }
   }
@@ -1441,7 +1441,7 @@ rdcarray<CaptureFileFormat> RenderDoc::GetCaptureFileFormats()
 
   {
     CaptureFileFormat rdc;
-    rdc.extension = "rdc";
+    rdc.extension = "capture";
     rdc.name = "Native RDC capture file format.";
     rdc.description = "The format produced by frame-captures from applications directly.";
     rdc.openSupported = true;
@@ -1687,9 +1687,9 @@ void RenderDoc::SetCaptureFileTemplate(const rdcstr &pathtemplate)
 
   m_CaptureFileTemplate = pathtemplate;
 
-  if(m_CaptureFileTemplate.length() > 4 &&
-     m_CaptureFileTemplate.substr(m_CaptureFileTemplate.length() - 4) == ".rdc")
-    m_CaptureFileTemplate = m_CaptureFileTemplate.substr(0, m_CaptureFileTemplate.length() - 4);
+  if(m_CaptureFileTemplate.length() > 8 &&
+     m_CaptureFileTemplate.substr(m_CaptureFileTemplate.length() - 8) == ".capture")
+    m_CaptureFileTemplate = m_CaptureFileTemplate.substr(0, m_CaptureFileTemplate.length() - 8);
 
   FileIO::CreateParentDirectory(m_CaptureFileTemplate);
 }

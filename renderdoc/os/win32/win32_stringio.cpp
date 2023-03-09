@@ -354,8 +354,8 @@ void GetDefaultFiles(const rdcstr &logBaseName, rdcstr &capture_filename, rdcstr
 
   wchar_t *filename_start = temp_filename + wcslen(temp_filename);
 
-  wsprintf(filename_start, L"RenderDoc\\%ls_%04d.%02d.%02d_%02d.%02d.rdc", mod, 1900 + now.tm_year,
-           now.tm_mon + 1, now.tm_mday, now.tm_hour, now.tm_min);
+  wsprintf(filename_start, L"RenderDoc\\%ls_%04d.%02d.%02d_%02d.%02d.%s", mod, 1900 + now.tm_year,
+           now.tm_mon + 1, now.tm_mday, now.tm_hour, now.tm_min, RENDERDOC_CAPTURE_FILE_SUFFIX);
 
   capture_filename = StringFormat::Wide2UTF8(temp_filename);
 

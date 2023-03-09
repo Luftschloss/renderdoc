@@ -369,7 +369,7 @@ void DisplayRendererPreview(IReplayController *renderer, TextureDisplay &display
 
 // Returns the renderdoccmd arguments passed via am start
 // Examples: am start ... -e renderdoccmd "remoteserver"
-// -e renderdoccmd "replay /sdcard/capture.rdc"
+// -e renderdoccmd "replay /sdcard/capture.capture"
 std::vector<std::string> getRenderdoccmdArgs()
 {
   JNIEnv *env;

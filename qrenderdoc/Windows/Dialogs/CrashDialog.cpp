@@ -424,7 +424,7 @@ void CrashDialog::sendReport()
         capture.setHeader(QNetworkRequest::ContentTypeHeader,
                           lit("application/x-renderdoc-capture"));
         capture.setHeader(QNetworkRequest::ContentDispositionHeader,
-                          lit("form-data; name=\"capture\"; filename=\"capture.rdc\""));
+                          lit("form-data; name=\"capture\"; filename=\"capture.capture\""));
         capture.setBodyDevice(file);
 
         multiPart->append(capture);

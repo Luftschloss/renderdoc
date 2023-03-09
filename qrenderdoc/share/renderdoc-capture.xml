@@ -5,6 +5,6 @@
 		<magic priority="50">
 			<match value="RDOC" type="string" offset="0:4"/>
 		</magic>
-		<glob pattern="*.rdc"/>
+		<glob pattern="*.capture"/>
 	</mime-type>
 </mime-info>

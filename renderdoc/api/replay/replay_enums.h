@@ -4014,7 +4014,7 @@ DOCUMENT(R"(A set of flags describing the properties of a section in a renderdoc
 
   This section was stored as pure ASCII. This can be useful since it is possible to generate
   an ASCII section in a text editor by hand or with any simple printf style script, and then
-  concatenate it to a .rdc and have a valid section.
+  concatenate it to a .capture and have a valid section.
 
 .. data:: LZ4Compressed
 

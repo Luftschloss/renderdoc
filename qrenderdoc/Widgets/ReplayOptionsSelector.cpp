@@ -201,7 +201,7 @@ void ReplayOptionsSelector::on_captureFileBrowse_clicked()
   }
 
   QString filename = RDDialog::getOpenFileName(this, tr("Select capture to open"), initDir,
-                                               tr("Capture Files (*.rdc);;All Files (*)"));
+                                               tr("Capture Files (*.capture);;All Files (*)"));
 
   if(!filename.isEmpty())
     ui->captureFile->setCurrentText(filename);

@@ -352,7 +352,7 @@ void LiveCapture::saveCapture_triggered()
 
     if(!path.isEmpty())
     {
-      if(path.endsWith(lit(".rdc")))
+      if(path.endsWith(lit(".capture")))
         path.chop(4);
 
       // don't save duplicates if we have multiple captures from the same frame (possible if the
@@ -378,7 +378,7 @@ void LiveCapture::saveCapture_triggered()
           existingFiles[cap->frameNumber] = 2;
         }
 
-        saveCapture(cap, QFormatStr("%1.rdc").arg(filename));
+        saveCapture(cap, QFormatStr("%1.capture").arg(filename));
       }
     }
   }

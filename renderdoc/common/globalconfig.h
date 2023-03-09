@@ -172,6 +172,8 @@ enum
 // This MUST match the package name in the build process that generates per-architecture packages
 #define RENDERDOC_ANDROID_PACKAGE_BASE "com.uwa.uwaclient"
 
+#define RENDERDOC_CAPTURE_FILE_SUFFIX "capture"
+
 /////////////////////////////////////////////////
 // Debugging features configuration
 

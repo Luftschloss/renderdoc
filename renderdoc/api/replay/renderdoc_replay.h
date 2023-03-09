@@ -1421,7 +1421,7 @@ This method supports converting from non-native representations via structured d
 the input format in the :paramref:`OpenFile.filetype` parameter. The list of supported formats can be retrieved
 by calling :meth:`GetCaptureFileFormats`.
 
-``rdc`` is guaranteed to always be a supported filetype, and will be assumed if the filetype is
+``capture`` is guaranteed to always be a supported filetype, and will be assumed if the filetype is
 empty or unrecognised.
 
 :param str filename: The filename of the file to open.
@@ -1502,7 +1502,7 @@ any other function call may reset the error string to empty.
 
   DOCUMENT(R"(Queries for how well a particular capture is supported on the local machine.
 
-If the file was opened with a format other than native ``rdc`` this will always return no
+If the file was opened with a format other than native ``capture`` this will always return no
 replay support.
 
 :return: How much support for replay exists locally.
@@ -1564,7 +1564,7 @@ This function may only be called if the handle is 'empty' - i.e. no file has bee
                            uint64_t timeBase, double timeFreq) = 0;
 
   DOCUMENT(R"(Opens a capture for replay locally and returns a handle to the capture. Only supported
-for handles opened with a native ``rdc`` capture, otherwise this will fail.
+for handles opened with a native ``capture`` capture, otherwise this will fail.
 
 This function will block until the capture is fully loaded and ready.
 

@@ -384,8 +384,8 @@ typedef void(RENDERDOC_CC *pRENDERDOC_UnloadCrashHandler)();
 //
 // SetCaptureFilePathTemplate("my_captures/example");
 //
-// Capture #1 -> my_captures/example_frame123.rdc
-// Capture #2 -> my_captures/example_frame456.rdc
+// Capture #1 -> my_captures/example_frame123.capture
+// Capture #2 -> my_captures/example_frame456.capture
 typedef void(RENDERDOC_CC *pRENDERDOC_SetCaptureFilePathTemplate)(const char *pathtemplate);
 
 // returns the current capture path template, see SetCaptureFileTemplate above, as a UTF-8 string

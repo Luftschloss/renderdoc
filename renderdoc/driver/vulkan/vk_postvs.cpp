@@ -45,7 +45,7 @@ struct VkXfbQueryResult
   uint64_t numPrimitivesGenerated;
 };
 
-static const char *PatchedMeshOutputEntryPoint = "rdc";
+static const char *PatchedMeshOutputEntryPoint = "capture";
 static const uint32_t MeshOutputDispatchWidth = 128;
 static uint32_t MeshOutputBufferArraySize = 64;
 

@@ -333,7 +333,7 @@
         <item row="6" column="1">
          <widget class="QLabel" name="captureFilename">
           <property name="text">
-           <string>filename_of_capture.rdc</string>
+           <string>filename_of_capture.capture</string>
           </property>
          </widget>
         </item>

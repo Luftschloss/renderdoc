@@ -218,8 +218,8 @@ ReplayStatus CaptureFile::OpenFile(const rdcstr &filename, const rdcstr &filetyp
   }
   else
   {
-    if(filetype != "" && filetype != "rdc")
-      RDCWARN("Opening file with unrecognised filetype '%s' - treating as 'rdc'", filetype.c_str());
+    if(filetype != "" && filetype != RENDERDOC_CAPTURE_FILE_SUFFIX)
+      RDCWARN("Opening file with unrecognised filetype '%s' - treating as 'capture'", filetype.c_str());
 
     if(progress)
       progress(0.0f);
@@ -260,8 +260,8 @@ ReplayStatus CaptureFile::OpenBuffer(const bytebuf &buffer, const rdcstr &filety
   }
   else
   {
-    if(filetype != "" && filetype != "rdc")
-      RDCWARN("Opening file with unrecognised filetype '%s' - treating as 'rdc'", filetype.c_str());
+    if(filetype != "" && filetype != RENDERDOC_CAPTURE_FILE_SUFFIX)
+      RDCWARN("Opening file with unrecognised filetype '%s' - treating as 'capture'", filetype.c_str());
 
     if(progress)
       progress(0.0f);
@@ -439,8 +439,8 @@ ReplayStatus CaptureFile::Convert(const rdcstr &filename, const rdcstr &filetype
     }
   }
 
-  if(filetype != "" && filetype != "rdc")
-    RDCWARN("Converting file to unrecognised filetype '%s' - treating as 'rdc'", filetype.c_str());
+  if(filetype != "" && filetype != RENDERDOC_CAPTURE_FILE_SUFFIX)
+    RDCWARN("Converting file to unrecognised filetype '%s' - treating as 'capture'", filetype.c_str());
 
   RDCFile output;
 

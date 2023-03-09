@@ -220,8 +220,8 @@ void GetDefaultFiles(const rdcstr &logBaseName, rdcstr &capture_filename, rdcstr
   }
 
   capture_filename =
-      StringFormat::Fmt("%s/RenderDoc/%s_%04d.%02d.%02d_%02d.%02d.rdc", temp_folder, mod,
-                        1900 + now.tm_year, now.tm_mon + 1, now.tm_mday, now.tm_hour, now.tm_min);
+      StringFormat::Fmt("%s/RenderDoc/%s_%04d.%02d.%02d_%02d.%02d.%s", temp_folder, mod, 1900 + now.tm_year, now.tm_mon + 1, now.tm_mday,
+                                       now.tm_hour, now.tm_min, RENDERDOC_CAPTURE_FILE_SUFFIX);
 
   // set by UI when launching programs so all logging goes to the same file
   char *logfile_override = getenv("RENDERDOC_DEBUG_LOG_FILE");

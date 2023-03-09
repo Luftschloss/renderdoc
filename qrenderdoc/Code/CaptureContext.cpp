@@ -281,7 +281,7 @@ rdcstr CaptureContext::TempCaptureFilename(const rdcstr &appname)
   }
 
   return dir.absoluteFilePath(
-      QFormatStr("%1_%2.rdc")
+      QFormatStr("%1_%2.capture")
           .arg(appname)
           .arg(QDateTime::currentDateTimeUtc().toString(lit("yyyy.MM.dd_HH.mm.ss"))));
 }
@@ -1224,7 +1224,7 @@ void CaptureContext::RecompressCapture()
   {
     // for remote files we open a new short-lived handle on the temporary file
     tempCap = cap = RENDERDOC_OpenCaptureFile();
-    cap->OpenFile(tempFilename, "rdc", NULL);
+    cap->OpenFile(tempFilename, "capture", NULL);
   }
 
   if(!cap)
@@ -1256,7 +1256,7 @@ void CaptureContext::RecompressCapture()
   float progress = 0.0f;
 
   LambdaThread *th = new LambdaThread([cap, destFilename, &progress]() {
-    cap->Convert(destFilename, "rdc", NULL, [&progress](float p) { progress = p; });
+    cap->Convert(destFilename, "capture", NULL, [&progress](float p) { progress = p; });
   });
   th->setName(lit("RecompressCapture"));
   th->start();
@@ -1284,7 +1284,7 @@ void CaptureContext::RecompressCapture()
     QFile::rename(destFilename, GetCaptureFilename());
 
     // and re-open
-    cap->OpenFile(GetCaptureFilename(), "rdc", NULL);
+    cap->OpenFile(GetCaptureFilename(), "capture", NULL);
   }
   else
   {
@@ -1485,7 +1485,7 @@ bool CaptureContext::ImportCapture(const CaptureFileFormat &fmt, const rdcstr &i
     }
 
     status =
-        file->Convert(rdcfile, "rdc", NULL, [&progress](float p) { progress = 0.5f + p * 0.5f; });
+        file->Convert(rdcfile, "capture", NULL, [&progress](float p) { progress = 0.5f + p * 0.5f; });
     file->Shutdown();
   });
   th->setName(lit("ImportCapture"));
@@ -1537,7 +1537,7 @@ void CaptureContext::ExportCapture(const CaptureFileFormat &fmt, const rdcstr &e
   if(!file)
   {
     local = file = RENDERDOC_OpenCaptureFile();
-    status = file->OpenFile(m_CaptureFile, "rdc", NULL);
+    status = file->OpenFile(m_CaptureFile, "capture", NULL);
   }
 
   QString filename = QFileInfo(m_CaptureFile).fileName();

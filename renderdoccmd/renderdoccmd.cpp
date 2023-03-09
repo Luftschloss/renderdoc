@@ -186,7 +186,7 @@ public:
   ThumbCommand() : Command() {}
   virtual void AddOptions(cmdline::parser &parser)
   {
-    parser.set_footer("<filename.rdc>");
+    parser.set_footer("<filename.capture>");
     parser.add<std::string>("out", 'o', "The output filename to save the file to", true,
                             "filename.jpg");
     parser.add<std::string>("format", 'f',
@@ -259,7 +259,7 @@ public:
     bytebuf buf;
 
     ICaptureFile *file = RENDERDOC_OpenCaptureFile();
-    ReplayStatus st = file->OpenFile(conv(infile), "rdc", NULL);
+    ReplayStatus st = file->OpenFile(conv(infile), "capture", NULL);
     if(st == ReplayStatus::Succeeded)
     {
       buf = file->GetThumbnail(type, maxsize).data;
@@ -525,7 +525,7 @@ public:
   ReplayCommand() : Command() {}
   virtual void AddOptions(cmdline::parser &parser)
   {
-    parser.set_footer("<capture.rdc>");
+    parser.set_footer("<capture.capture>");
     parser.add<uint32_t>("width", 'w', "The preview window width.", false, 1280);
     parser.add<uint32_t>("height", 'h', "The preview window height.", false, 720);
     parser.add<uint32_t>("loops", 'l', "How many times to loop the replay, or 0 for indefinite.",
@@ -610,7 +610,7 @@ public:
 
       ICaptureFile *file = RENDERDOC_OpenCaptureFile();
 
-      if(file->OpenFile(conv(filename), "rdc", NULL) != ReplayStatus::Succeeded)
+      if(file->OpenFile(conv(filename), "capture", NULL) != ReplayStatus::Succeeded)
       {
         std::cerr << "Couldn't load '" << filename << "'." << std::endl;
         return 1;
@@ -1030,7 +1030,7 @@ public:
   EmbeddedSectionCommand(bool extract) : Command() { m_Extract = extract; }
   virtual void AddOptions(cmdline::parser &parser)
   {
-    parser.set_footer("<capture.rdc>");
+    parser.set_footer("<capture.capture>");
     parser.add<std::string>("section", 's', "The embedded section name.");
     parser.add<std::string>("file", 'f', m_Extract ? "The file to write the section contents to."
                                                    : "The file to read the section contents from.");
