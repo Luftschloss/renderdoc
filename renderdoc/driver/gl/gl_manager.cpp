@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
+#include "common/common.h"
 #include "gl_manager.h"
 #include <algorithm>
 #include "gl_driver.h"
@@ -82,8 +83,13 @@ void GLResourceManager::MarkFBODirtyWithWriteReference(GLResourceRecord *record)
 void GLResourceManager::MarkFBOAttachmentsReferenced(ResourceId fboid, GLResourceRecord *record,
                                                      FrameRefType ref, bool markDirty)
 {
-  FBOCache *cache = m_FBOAttachmentsCache[fboid];
+  if(record == nullptr)
+  {
+    RDCLOG("MarkFBOAttachmentsReferenced-0:record null");
+    return;
+  }
 
+  FBOCache *cache = m_FBOAttachmentsCache[fboid];
   if(!cache)
   {
     cache = m_FBOAttachmentsCache[fboid] = new FBOCache;
