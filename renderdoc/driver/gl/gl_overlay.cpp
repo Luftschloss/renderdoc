@@ -969,7 +969,7 @@ ResourceId GLReplay::RenderOverlay(ResourceId texid, FloatVector clearCol, Debug
         drv.glDisable(eGL_SCISSOR_TEST);
     }
 
-    float red[] = {1.0f, 0.0f, 0.0f, 1.0f};
+    float red[] = {1.0f, 0.0f, 1.0f, 1.0f};
     drv.glProgramUniform4fv(DebugData.overlayProg, overlayFixedColLocation, 1, red);
 
     ReplayLog(eventId, eReplay_OnlyDraw);
@@ -1221,7 +1221,7 @@ ResourceId GLReplay::RenderOverlay(ResourceId texid, FloatVector clearCol, Debug
     // bind the 'real' fbo to the read framebuffer, so we can blit from it
     drv.glBindFramebuffer(eGL_READ_FRAMEBUFFER, rs.DrawFBO.name);
 
-    float green[] = {0.0f, 1.0f, 0.0f, 1.0f};
+    float green[] = {0.0f, 1.0f, 1.0f, 1.0f};
     drv.glProgramUniform4fv(DebugData.overlayProg, overlayFixedColLocation, 1, green);
 
     if(overlay == DebugOverlay::Depth)
