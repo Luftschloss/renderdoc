@@ -5148,6 +5148,11 @@ ReplayStatus WrappedOpenGL::ContextReplayLog(CaptureState readType, uint32_t sta
 
   uint64_t startOffset = ser.GetReader()->GetOffset();
 
+  GLenum draw_buffers[] = {eGL_COLOR_ATTACHMENT0, eGL_COLOR_ATTACHMENT1, eGL_COLOR_ATTACHMENT2,
+                           eGL_COLOR_ATTACHMENT3, eGL_COLOR_ATTACHMENT4, eGL_COLOR_ATTACHMENT5,
+                           eGL_COLOR_ATTACHMENT6, eGL_COLOR_ATTACHMENT7};
+  GL.glDrawBuffers(8, draw_buffers);
+
   for(;;)
   {
     if(IsActiveReplaying(m_State) && m_CurEventID > endEventID)
