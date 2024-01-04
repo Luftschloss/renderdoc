@@ -173,45 +173,36 @@ void DisplayGenericSplash()
             const char *fragment = R"(
 precision highp float;
 
-float circle(in vec2 uv, in vec2 centre, in float radius)
+bool inRectangle(vec2 uv, vec4 rect)
 {
-  return length(uv - centre) - radius;
+   return uv.x >= rect.x && uv.x <= rect.z && uv.y >= rect.y && uv.y <= rect.w;
 }
 
-// distance field for RenderDoc logo
-float logo(in vec2 uv)
+// distance field for UWA logo
+vec4 logo(in vec2 uv)
 {
-  // add the outer ring
-  float ret = circle(uv, vec2(0.5, 0.5), 0.275);
-
-  // add the upper arc
-  ret = min(ret, circle(uv, vec2(0.5, -0.37), 0.71));
-
-  // subtract the inner ring
-  ret = max(ret, -circle(uv, vec2(0.5, 0.5), 0.16));
-
-  // subtract the lower arc
-  ret = max(ret, -circle(uv, vec2(0.5, -1.085), 1.3));
-
-  return ret;
+  if(inRectangle(uv, vec4(0.05, 0.2, 0.3, 0.8)) && !inRectangle(uv, vec4(0.13, 0.33, 0.22, 0.8)))
+  {
+      return vec4(1, 1, 1, 1);
+  }
+  else if(inRectangle(uv, vec4(0.33, 0.2, 0.67, 0.8)) && !inRectangle(uv, vec4(0.4, 0.33, 0.47, 0.8)) && !inRectangle(uv, vec4(0.53, 0.33, 0.60, 0.8)))
+  {
+      return vec4(1, 1, 1, 1);
+  }
+  else if(inRectangle(uv, vec4(0.7, 0.2, 0.95, 0.8)) && !inRectangle(uv, vec4(0.77, 0.53, 0.88, 0.7)) && !inRectangle(uv, vec4(0.77, 0.2, 0.88, 0.4)))
+  {
+      return vec4(1, 1, 1, 1);
+  }
+  return vec4(0.008, 0.420, 1.0, 1.0);
 }
 
 uniform vec2 iResolution;
 
 void main()
 {
-  // vec2 uv = gl_FragCoord.xy / iResolution.xy;
+  vec2 uv = gl_FragCoord.xy / iResolution.xy;
 
-  // centre the UVs in a square. This assumes a landscape layout.
-  // uv.x = 0.5 - (uv.x - 0.5) * (iResolution.x / iResolution.y);
-
-  // this constant here can be tuned depending on DPI to increase AA
-  // float edgeWidth = 10.0/max(iResolution.x, iResolution.y);
-
-  // float smoothdist = smoothstep(0.0, edgeWidth, clamp(logo(uv), 0.0, 1.0));
-
-  // gl_FragColor = mix(vec4(1.0), vec4(0.008, 0.420, 1.0, 1.0), smoothdist);
-  gl_FragColor = vec4(0.008, 0.420, 1.0, 1.0);
+  gl_FragColor = logo(uv);
 }
 )";
 
