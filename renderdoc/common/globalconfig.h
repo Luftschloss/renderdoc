@@ -154,11 +154,11 @@
 // Global constants
 enum
 {
-  RenderDoc_FirstTargetControlPort = 38920,
+  RenderDoc_FirstTargetControlPort = 41000,
   RenderDoc_LastTargetControlPort = RenderDoc_FirstTargetControlPort + 7,
-  RenderDoc_RemoteServerPort = 39920,
+  RenderDoc_RemoteServerPort = 42000,
 
-  RenderDoc_ForwardPortBase = 38950,
+  RenderDoc_ForwardPortBase = 43000,
   RenderDoc_ForwardTargetControlOffset = 0,
   RenderDoc_ForwardRemoteServerOffset = 9,
   RenderDoc_ForwardPortStride = 10,

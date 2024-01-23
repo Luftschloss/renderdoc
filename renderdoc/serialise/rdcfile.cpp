@@ -143,8 +143,7 @@ bool is_exr_file(FILE *f)
 
 */
 
-static const uint32_t MAGIC_HEADER = MAKE_FOURCC('R', 'D', 'O', 'C');
-static const uint32_t MAGIC_HEADER_UWA = MAKE_FOURCC('U', 'W', 'A', 'C');
+static const char* MAGIC_HEADER_UWA = "UWA_Capture";
 
 namespace
 {
@@ -152,24 +151,24 @@ struct FileHeader
 {
   FileHeader()
   {
-    magic = MAGIC_HEADER_UWA;
     version = RDCFile::SERIALISE_VERSION;
     headerLength = 0;
     RDCEraseEl(progVersion);
     char ver[] = MAJOR_MINOR_VERSION_STRING " xxxxxx";
-    char *hash = strstr(ver, "xxxxxx");
-    memcpy(hash, GitVersionHash, 6);
+    /*char *hash = strstr(ver, "xxxxxx");
+    memcpy(hash, GitVersionHash, 6);*/
 
     memcpy(progVersion, ver, RDCMIN(sizeof(progVersion), sizeof(ver)));
+    memcpy(magic, MAGIC_HEADER_UWA, 11);
+    magic[11] = '\0';
   }
-
-  uint64_t magic;
 
   uint32_t version;
   uint32_t headerLength;
 
   // string "v0.34" or similar with 0s after the string
   char progVersion[16];
+  char magic[12];
 };
 
 struct BinaryThumbnail
@@ -336,7 +335,7 @@ void RDCFile::Init(StreamReader &reader)
     RETURNERROR(ContainerError::FileIO, "I/O error reading magic number");
   }
 
-  if(header.magic != MAGIC_HEADER && header.magic != MAGIC_HEADER_UWA)
+  if(std::strcmp(header.magic, MAGIC_HEADER_UWA) != 0)
   {
     RETURNERROR(ContainerError::Corrupt, "Invalid capture file");
   }
