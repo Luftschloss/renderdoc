@@ -579,6 +579,7 @@ public:
     eOverlay_CaptureDisabled = 0x2,
   };
 
+  void GetDrawCallDatas(int mode, int count, int instancecount);
   rdcstr GetOverlayText(RDCDriver driver, uint32_t frameNumber, int flags);
 
   void CycleActiveWindow();
@@ -601,6 +602,19 @@ private:
   GlobalEnvironment m_GlobalEnv;
 
   int32_t m_PortSlot = 0;
+
+  struct FrameData
+  {
+    int drawcall{0};
+    int triangles{0};
+
+    void Reset()
+    {
+      drawcall = 0;
+      triangles = 0;
+    }
+
+  } m_FrameData;
 
   FrameTimer m_FrameTimer;
 

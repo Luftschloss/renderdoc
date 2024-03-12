@@ -945,6 +945,44 @@ void RenderDoc::CycleActiveWindow()
   }
 }
 
+void RenderDoc::GetDrawCallDatas(int mode, int count, int instancecount)
+{
+  m_FrameData.drawcall++;
+  long graphicsPrimitive = 0;
+  switch(mode)
+  {
+    case 0x0000: {
+      graphicsPrimitive = count;
+      break;
+    }
+    case 0x0001: {
+      graphicsPrimitive = count / 2;
+      break;
+    }
+    case 0x0002: {
+      graphicsPrimitive = count;
+      break;
+    }
+    case 0x0003: {
+      graphicsPrimitive = count - 1;
+      break;
+    }
+    case 0x0004: {
+      graphicsPrimitive = count / 3;
+      break;
+    }
+    case 0x0005: {
+      graphicsPrimitive = count - 2;
+      break;
+    }
+    case 0x0006: {
+      graphicsPrimitive = count - 2;
+      break;
+    }
+  }
+  m_FrameData.triangles += graphicsPrimitive * instancecount;
+}
+
 rdcstr RenderDoc::GetOverlayText(RDCDriver driver, uint32_t frameNumber, int flags)
 {
   const bool activeWindow = (flags & eOverlay_ActiveWindow);
@@ -976,9 +1014,9 @@ rdcstr RenderDoc::GetOverlayText(RDCDriver driver, uint32_t frameNumber, int fla
       else
       {
         if(IsTargetControlConnected())
-          overlayText += "Connected by " + GetTargetControlUsername() + ".";
+          overlayText += "Connected by " + GetTargetControlUsername() + ".\n";
         else
-          overlayText += "No remote access connection.";
+          overlayText += "No remote access connection.\n";
       }
     }
 
@@ -988,11 +1026,12 @@ rdcstr RenderDoc::GetOverlayText(RDCDriver driver, uint32_t frameNumber, int fla
     }
     if(overlay & eRENDERDOC_Overlay_FrameRate)
     {
-      overlayText +=
-          StringFormat::Fmt(" %.2lf ms (%.2lf .. %.2lf) (%.0lf FPS)", m_FrameTimer.GetAvgFrameTime(),
-                            m_FrameTimer.GetMinFrameTime(), m_FrameTimer.GetMaxFrameTime(),
-                            // max with 0.01ms so that we don't divide by zero
-                            1000.0f / RDCMAX(0.01, m_FrameTimer.GetAvgFrameTime()));
+      overlayText += StringFormat::Fmt(" FPS: %.0lf",
+                                       // max with 0.01ms so that we don't divide by zero
+                                       1000.0f / RDCMAX(0.01, m_FrameTimer.GetAvgFrameTime()));
+
+      overlayText += StringFormat::Fmt(" DrawCall: %d. Triangles: %d", m_FrameData.drawcall, m_FrameData.triangles);
+      m_FrameData.Reset();
     }
 
     overlayText += "\n";

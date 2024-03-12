@@ -1173,6 +1173,7 @@ void WrappedOpenGL::glDrawArrays(GLenum mode, GLint first, GLsizei count)
 
   if(IsBackgroundCapturing(m_State))
   {
+    RenderDoc::Inst().GetDrawCallDatas(mode, count, 1);
     GLRenderState::MarkDirty(this);
   }
   else if(IsActiveCapturing(m_State))
@@ -1257,6 +1258,7 @@ void WrappedOpenGL::glDrawArraysIndirect(GLenum mode, const void *indirect)
 
   if(IsBackgroundCapturing(m_State))
   {
+    RenderDoc::Inst().GetDrawCallDatas(mode, 1, 1);
     GLRenderState::MarkDirty(this);
   }
   else if(IsActiveCapturing(m_State))
@@ -1485,6 +1487,7 @@ void WrappedOpenGL::glDrawElements(GLenum mode, GLsizei count, GLenum type, cons
 
   if(IsBackgroundCapturing(m_State))
   {
+    RenderDoc::Inst().GetDrawCallDatas(mode, count, 1);
     GLRenderState::MarkDirty(this);
   }
   else if(IsActiveCapturing(m_State))
@@ -1574,6 +1577,7 @@ void WrappedOpenGL::glDrawElementsIndirect(GLenum mode, GLenum type, const void 
 
   if(IsBackgroundCapturing(m_State))
   {
+    RenderDoc::Inst().GetDrawCallDatas(mode, 1, 1);
     GLRenderState::MarkDirty(this);
   }
   else if(IsActiveCapturing(m_State))
@@ -1814,6 +1818,7 @@ void WrappedOpenGL::glDrawElementsBaseVertex(GLenum mode, GLsizei count, GLenum 
 
   if(IsBackgroundCapturing(m_State))
   {
+    RenderDoc::Inst().GetDrawCallDatas(mode, count, 1);
     GLRenderState::MarkDirty(this);
   }
   else if(IsActiveCapturing(m_State))
@@ -1893,6 +1898,7 @@ void WrappedOpenGL::glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum t
 
   if(IsBackgroundCapturing(m_State))
   {
+    RenderDoc::Inst().GetDrawCallDatas(mode, count, instancecount);
     GLRenderState::MarkDirty(this);
   }
   else if(IsActiveCapturing(m_State))
@@ -1978,6 +1984,7 @@ void WrappedOpenGL::glDrawElementsInstancedBaseInstance(GLenum mode, GLsizei cou
 
   if(IsBackgroundCapturing(m_State))
   {
+    RenderDoc::Inst().GetDrawCallDatas(mode, count, instancecount);
     GLRenderState::MarkDirty(this);
   }
   else if(IsActiveCapturing(m_State))
@@ -2065,6 +2072,7 @@ void WrappedOpenGL::glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count
 
   if(IsBackgroundCapturing(m_State))
   {
+    RenderDoc::Inst().GetDrawCallDatas(mode, count, instancecount);
     GLRenderState::MarkDirty(this);
   }
   else if(IsActiveCapturing(m_State))
