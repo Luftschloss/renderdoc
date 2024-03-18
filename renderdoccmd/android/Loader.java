@@ -4,17 +4,46 @@ import android.app.Activity;
 import android.view.WindowManager;
 import android.os.Environment;
 import android.content.Intent;
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 public class Loader extends android.app.NativeActivity
 {
+
+    public native void updateLogoData(byte[] data, int width, int height);
+    
     /* load our native library */
     static {
         System.loadLibrary("uwaclient"); // this will load VkLayer_GLES_RenderDoc as well
     }
 
+    public void LoadLogoAndUpdate()
+    {
+    try {
+        InputStream inputStream = getAssets().open("textures/logo.png");
+        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int bytes = bitmap.getByteCount();
+        ByteBuffer buffer = ByteBuffer.allocate(bytes);
+        bitmap.copyPixelsToBuffer(buffer);
+        updateLogoData(buffer.array(), width, height);
+        inputStream.close();
+    }catch(IOException e){
+
+    }
+    }
+
     @Override
     protected void onCreate(android.os.Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        LoadLogoAndUpdate();
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // if we're running on something older than Android M (6.0), return now

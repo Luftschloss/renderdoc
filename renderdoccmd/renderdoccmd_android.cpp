@@ -33,9 +33,48 @@
 #include <string>
 
 #include <android_native_app_glue.h>
+#include <jni.h>
 
 #include <android/log.h>
 #define ANDROID_LOG(...) __android_log_print(ANDROID_LOG_INFO, "uwaclient", __VA_ARGS__);
+
+byte *logo_data = nullptr;
+unsigned logo_width = 0;
+unsigned logo_height = 0;
+
+extern "C" JNIEXPORT void JNICALL 
+Java_com_uwa_uwaclient_arm32_Loader_updateLogoData(JNIEnv *env, jobject obj, jbyteArray data, jint width, jint height)
+{
+  jbyte *buffer = env->GetByteArrayElements(data, NULL);
+  // 更新logo贴图数据
+  jsize len = env->GetArrayLength(data);
+  logo_data = new byte[len];
+  memcpy(logo_data, buffer, len);
+  logo_width = width;
+  logo_height = height;
+
+  ANDROID_LOG("arm32_updateLogoData : %i x %i", logo_width, logo_height);
+
+  // 释放字节数组的内存
+  env->ReleaseByteArrayElements(data, buffer, JNI_ABORT);
+}
+
+extern "C" JNIEXPORT void JNICALL 
+Java_com_uwa_uwaclient_arm64_Loader_updateLogoData(JNIEnv *env, jobject obj, jbyteArray data, jint width, jint height)
+{
+  jbyte *buffer = env->GetByteArrayElements(data, NULL);
+  // 更新logo贴图数据
+  jsize len = env->GetArrayLength(data);
+  logo_data = new byte[len];
+  memcpy(logo_data, buffer, len);
+  logo_width = width;
+  logo_height = height;
+
+  ANDROID_LOG("arm32_updateLogoData : %i x %i", logo_width, logo_height);
+
+  // 释放字节数组的内存
+  env->ReleaseByteArrayElements(data, buffer, JNI_ABORT);
+}
 
 struct android_app *android_state;
 pthread_t cmdthread_handle = 0;
@@ -112,6 +151,7 @@ void DisplayGenericSplash()
   GPA_GET(glAttachShader);
   GPA_GET(glLinkProgram);
   GPA_GET(glGetUniformLocation);
+  GPA_GET(glUniform1i);
   GPA_GET(glUniform2f);
   GPA_GET(glUseProgram);
   GPA_GET(glVertexAttribPointer);
@@ -121,6 +161,11 @@ void DisplayGenericSplash()
   GPA_GET(glGetShaderInfoLog);
   GPA_GET(glGetProgramiv);
   GPA_GET(glGetProgramInfoLog);
+  GPA_GET(glGenTextures);
+  GPA_GET(glBindTexture);
+  GPA_GET(glTexImage2D);
+  GPA_GET(glTexParameteri);
+  GPA_GET(glActiveTexture);
 
   eglBindAPI(EGL_OPENGL_ES_API);
 
@@ -165,46 +210,36 @@ void DisplayGenericSplash()
           {
             eglMakeCurrent(eglDisplay, surface, surface, ctx);
 
+            unsigned int texture;
+            glGenTextures(1, &texture);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            if(logo_data != NULL)
+            {
+              glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, logo_width, logo_height, 0, GL_RGBA,
+                           GL_UNSIGNED_BYTE, logo_data);
+            }
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, texture);
+
             // simple pass through shader for the fullscreen triangle verts
             const char *vertex =
                 "attribute vec2 pos;\n"
                 "void main() { gl_Position = vec4(pos, 0.5, 1.0); }";
 
             const char *fragment = R"(
-precision highp float;
-
-bool inRectangle(vec2 uv, vec4 rect)
-{
-   return uv.x >= rect.x && uv.x <= rect.z && uv.y >= rect.y && uv.y <= rect.w;
-}
-
-// distance field for UWA logo
-vec4 logo(in vec2 uv)
-{
-  if(inRectangle(uv, vec4(0.05, 0.2, 0.3, 0.8)) && !inRectangle(uv, vec4(0.13, 0.33, 0.22, 0.8)))
-  {
-      return vec4(1, 1, 1, 1);
-  }
-  else if(inRectangle(uv, vec4(0.33, 0.2, 0.67, 0.8)) && !inRectangle(uv, vec4(0.4, 0.33, 0.47, 0.8)) && !inRectangle(uv, vec4(0.53, 0.33, 0.60, 0.8)))
-  {
-      return vec4(1, 1, 1, 1);
-  }
-  else if(inRectangle(uv, vec4(0.7, 0.2, 0.95, 0.8)) && !inRectangle(uv, vec4(0.77, 0.53, 0.88, 0.7)) && !inRectangle(uv, vec4(0.77, 0.2, 0.88, 0.4)))
-  {
-      return vec4(1, 1, 1, 1);
-  }
-  return vec4(0.008, 0.420, 1.0, 1.0);
-}
-
-uniform vec2 iResolution;
-
-void main()
-{
-  vec2 uv = gl_FragCoord.xy / iResolution.xy;
-
-  gl_FragColor = logo(uv);
-}
-)";
+                precision highp float;
+                uniform vec2 iResolution;
+                uniform sampler2D tex;
+                void main()
+                {
+                    vec2 uv = gl_FragCoord.xy / iResolution.xy;
+                    vec4 finalcol = texture2D(tex, vec2(uv.x, 1.0 - uv.y));
+	                gl_FragColor = finalcol;
+                })";
 
             // compile the shaders and link into a program
             GLuint vs = glCreateShader(GL_VERTEX_SHADER);
@@ -246,11 +281,10 @@ void main()
             }
 
             glUseProgram(prog);
-
-            // set the resolution
             GLuint loc = glGetUniformLocation(prog, "iResolution");
             glUniform2f(loc, float(ANativeWindow_getWidth(previewWindow)),
                         float(ANativeWindow_getHeight(previewWindow)));
+            glUniform1i(glGetUniformLocation(prog, "tex"), 0);
 
             // fullscreen triangle
             float verts[] = {
