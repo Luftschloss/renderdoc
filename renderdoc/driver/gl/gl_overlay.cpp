@@ -2134,6 +2134,62 @@ ResourceId GLReplay::RenderOverlay(ResourceId texid, FloatVector clearCol, Debug
       }
     }
   }
+  else if(overlay == DebugOverlay::OverdrawDraw || overlay == DebugOverlay::OverdrawPass)
+  {
+    if(HasExt[ARB_viewport_array])
+      drv.glDisablei(eGL_SCISSOR_TEST, 0);
+    else
+      drv.glDisable(eGL_SCISSOR_TEST);
+
+    float color[4] = {0.02f, 0.008f, 0.004f, 1.0f};
+    unsigned last = 0;
+    bool first = true;
+    auto cpy = passEvents;
+    if(overlay == DebugOverlay::OverdrawDraw)
+      cpy.clear();
+    cpy.push_back(eventId);
+    for(auto i : cpy)
+    {
+      m_pDriver->ReplayLog(last, i, eReplay_WithoutDraw);
+      last = i + 1;
+      rs.FetchState(&drv);
+
+      auto fs =
+          m_pDriver->m_Programs[m_pDriver->GetResourceManager()->GetResID(rs.Program)].stageShaders[4];
+      if(fs != ResourceId())
+      {
+        CreateOverlayProgram(rs.Program.name, rs.Pipeline.name, DebugData.fixedcolFragShader,
+                             DebugData.fixedcolFragShaderSPIRV);
+      }
+      GLuint originProg = 0;
+      drv.glGetIntegerv(eGL_CURRENT_PROGRAM, (GLint *)&originProg);
+      drv.glUseProgram(DebugData.overlayProg);
+      drv.glProgramUniform4fv(DebugData.overlayProg, overlayFixedColLocation, 1, color);
+      drv.glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+      if(HasExt[ARB_draw_buffers_blend])
+      {
+        drv.glEnablei(eGL_BLEND, 0);
+        drv.glBlendFuncSeparatei(0, eGL_ONE, eGL_ONE, eGL_ONE, eGL_ONE);
+        drv.glBlendEquationSeparatei(0, eGL_FUNC_ADD, eGL_FUNC_ADD);
+      }
+      else
+      {
+        drv.glEnable(eGL_BLEND);
+        drv.glBlendFuncSeparate(eGL_ONE, eGL_ONE, eGL_ONE, eGL_ONE);
+        drv.glBlendEquationSeparate(eGL_FUNC_ADD, eGL_FUNC_ADD);
+      }
+      if(first)
+      {
+        float black[] = {0.0f, 0.0f, 0.0f, 1.0f};
+        drv.glClearBufferfv(eGL_COLOR, 0, black);
+        first = false;
+      }
+      m_pDriver->ReplayLog(i, i, eReplay_OnlyDraw);
+      drv.glUseProgram(originProg);
+      drv.glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+      rs.FetchState(&drv);
+    }
+  }
   else
   {
     RDCERR(

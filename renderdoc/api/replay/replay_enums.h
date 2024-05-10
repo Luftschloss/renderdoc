@@ -1333,6 +1333,9 @@ enum class DebugOverlay : uint32_t
   QuadOverdrawDraw,
   TriangleSizePass,
   TriangleSizeDraw,
+  OverdrawPass,
+  OverdrawDraw,
+  DisplayShaders
 };
 
 DECLARE_REFLECTION_ENUM(DebugOverlay);
