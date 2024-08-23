@@ -990,7 +990,8 @@ rdcstr RenderDoc::GetOverlayText(RDCDriver driver, uint32_t frameNumber, int fla
 
   uint32_t overlay = GetOverlayBits();
 
-  rdcstr overlayText = ToStr(driver) + ". ";
+  rdcstr overlayText = "If show this outside FrameCapture, use cmd below to remove\n adb shell settings delete global gpu_debug_app\n";
+  overlayText += ToStr(driver) + ". ";
 
   if(activeWindow)
   {

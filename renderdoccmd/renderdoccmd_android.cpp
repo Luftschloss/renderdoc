@@ -36,7 +36,8 @@
 #include <jni.h>
 
 #include <android/log.h>
-#define ANDROID_LOG(...) __android_log_print(ANDROID_LOG_INFO, "uwaclient", __VA_ARGS__);
+#define ANDROID_LOG(...) __android_log_print(ANDROID_LOG_INFO, "gears_capture_cmd", __VA_ARGS__);
+
 
 byte *logo_data = nullptr;
 unsigned logo_width = 0;
@@ -53,8 +54,6 @@ Java_com_uwa_uwaclient_arm32_Loader_updateLogoData(JNIEnv *env, jobject obj, jby
   logo_width = width;
   logo_height = height;
 
-  ANDROID_LOG("arm32_updateLogoData : %i x %i", logo_width, logo_height);
-
   // 释放字节数组的内存
   env->ReleaseByteArrayElements(data, buffer, JNI_ABORT);
 }
@@ -69,8 +68,6 @@ Java_com_uwa_uwaclient_arm64_Loader_updateLogoData(JNIEnv *env, jobject obj, jby
   memcpy(logo_data, buffer, len);
   logo_width = width;
   logo_height = height;
-
-  ANDROID_LOG("arm32_updateLogoData : %i x %i", logo_width, logo_height);
 
   // 释放字节数组的内存
   env->ReleaseByteArrayElements(data, buffer, JNI_ABORT);
