@@ -174,8 +174,8 @@ if(ANDROID)
 
     # APK_VERSION_CODE corresponds to android:versionCode, an internal integer value that can be queried. Higher numbers indicate more recent versions.
     # APK_VERSION_NAME corresponds to android:versionName, a string value that is displayed to the user.
-    set(APK_VERSION_CODE 10004)
-    set(APK_VERSION_NAME "Gears-v1.0.4")
+    set(APK_VERSION_CODE 10005)
+    set(APK_VERSION_NAME "Gears-v1.0.5")
     message(STATUS "Building APK versionCode ${APK_VERSION_CODE}, versionName ${APK_VERSION_NAME}")
 
     # Set the package name based on the ABI

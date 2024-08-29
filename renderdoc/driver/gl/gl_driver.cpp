@@ -5374,6 +5374,33 @@ void WrappedOpenGL::AddUsage(const ActionDescription &a)
 
             refl[i] = m_Shaders[pipeDetails.stageShaders[i]].reflection;
             GetBindpointMapping(curProg, (int)i, refl[i], mapping[i]);
+            switch(i)
+            {
+              case 0:
+                m_ResourceUses[pipeDetails.stageShaders[i]].push_back(
+                    EventUsage(e, ResourceUsage::VS_Resource));
+                break;
+              case 1:
+                m_ResourceUses[pipeDetails.stageShaders[i]].push_back(
+                    EventUsage(e, ResourceUsage::HS_Resource));
+                break;
+              case 2:
+                m_ResourceUses[pipeDetails.stageShaders[i]].push_back(
+                    EventUsage(e, ResourceUsage::DS_Resource));
+                break;
+              case 3:
+                m_ResourceUses[pipeDetails.stageShaders[i]].push_back(
+                    EventUsage(e, ResourceUsage::GS_Resource));
+                break;
+              case 4:
+                m_ResourceUses[pipeDetails.stageShaders[i]].push_back(
+                    EventUsage(e, ResourceUsage::PS_Resource));
+                break;
+              case 5:
+                m_ResourceUses[pipeDetails.stageShaders[i]].push_back(
+                    EventUsage(e, ResourceUsage::CS_Resource));
+                break;
+            }
           }
         }
       }
@@ -5388,6 +5415,34 @@ void WrappedOpenGL::AddUsage(const ActionDescription &a)
         {
           refl[i] = m_Shaders[progDetails.stageShaders[i]].reflection;
           GetBindpointMapping(curProg, (int)i, refl[i], mapping[i]);
+          auto resID = rm->GetResID(ProgramRes(ctx, curProg));
+          switch(i)
+          {
+            case 0:
+              m_ResourceUses[progDetails.stageShaders[i]].push_back(
+                  EventUsage(e, ResourceUsage::VS_Resource));
+              break;
+            case 1:
+              m_ResourceUses[progDetails.stageShaders[i]].push_back(
+                  EventUsage(e, ResourceUsage::HS_Resource));
+              break;
+            case 2:
+              m_ResourceUses[progDetails.stageShaders[i]].push_back(
+                  EventUsage(e, ResourceUsage::DS_Resource));
+              break;
+            case 3:
+              m_ResourceUses[progDetails.stageShaders[i]].push_back(
+                  EventUsage(e, ResourceUsage::GS_Resource));
+              break;
+            case 4:
+              m_ResourceUses[progDetails.stageShaders[i]].push_back(
+                  EventUsage(e, ResourceUsage::PS_Resource));
+              break;
+            case 5:
+              m_ResourceUses[progDetails.stageShaders[i]].push_back(
+                  EventUsage(e, ResourceUsage::CS_Resource));
+              break;
+          }
         }
       }
     }
